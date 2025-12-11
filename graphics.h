@@ -31,4 +31,6 @@ Image *imageLoad(const char *path);
 void imageDraw(Image *img, int x, int y, int tx, int ty);
 void imageFree(Image *img);
 
+void imagePoolFreeAll();
+
 #endif

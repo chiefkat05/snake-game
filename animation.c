@@ -103,6 +103,12 @@ void animationPoolUpdateAll()
         cursor = cursor->next;
     }
 }
+void animationPoolFreeAll()
+{
+    // we do a little trolling
+    anim_pool.head = 0;
+    anim_pool.free_animations = NULL;
+}
 
 void imageDrawAnimated(Image *img, int x, int y, Animation *anim)
 {

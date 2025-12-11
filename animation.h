@@ -39,6 +39,7 @@ void animationFinish(uint8 args);
 void animationUpdate(Animation *anim);
 
 void animationPoolUpdateAll();
+void animationPoolFreeAll();
 
 void imageDrawAnimated(Image *img, int x, int y, Animation *anim);
 

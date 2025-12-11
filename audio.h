@@ -29,4 +29,6 @@ void musicFree(Music *mus);
 void musicFadeIn(Music *mus);
 void musicFadeOut(Music *mus);
 
+void musicPoolFreeAll();
+
 #endif

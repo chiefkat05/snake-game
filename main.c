@@ -11,31 +11,6 @@
 
 // game plan
 
-// apply non-animated snake graphics in the code
-// make animation system be apply-and-forget, by making an imageAnimate function where you specify the animation components (cont.)
-//      and the imageDraw function handles the animating sprite by checking if there's an animation in play and picking the appropriate (cont.)
-//      sprite to draw.
-
-/*
-
-    // behind the scenes: hold a specific animation pointer that is the "current edited animation"
-    // (note: the frameaction and framesound functions are theoretical, don't implement them today)
-    beginAnimation(&snakeAnim);
-    addFrame(0, 0, 100); // hold sprite texture position 0, 0 for 100 ticks
-    // addFrameAction((void *)funcFoo()); // hmm
-    addFrame(1, 0, 100);
-    // addFrameSound(&snakeHissSnd); // could also be done with the frameAction but I think having a dedicated function for this is worth (You'll probably be adding a bunch of sounds to animations)
-    // examples of animations that could have sounds play on a frame:
-    //      snake hisses on the frame he sticks his tongue out
-    //      player step sound
-    //      title card shine sound when the shine frames play
-    //      there's an endless selection, endless - brian regan
-    endAnimation(LOOPING); // apply final animation properties with a bitflag (like whether it loops) (in fact just make this the loopcheck rn)
-    // other animation flags in the future could be REVERSE (MIRRORED), PING-PONG, more if you think of them
-
-    imageDrawAnimated(&snakeImg, &snakeAnim);
-*/
-
 // make a drawmulti function that can draw a larger texture clip rect (still locked to 16 pixel values)
 // make the ui map with the title screen and buttons
 // make a simple button thing that runs a function on press
@@ -163,6 +138,7 @@ typedef struct
 {
     int x, y;
     Direction last_move_direction;
+    int destroyed, exploding;
 } SnakePart;
 typedef struct
 {
@@ -196,7 +172,7 @@ typedef enum
 typedef struct
 {
     int running;
-    GameState state;
+    GameState state, gotostate;
     int level;
 
     Snake snake;
@@ -221,19 +197,7 @@ typedef struct
     Animation *snakeHeadSouthWestAnim;
     Animation *snakeHeadSouthEastAnim;
 
-    // Animation *snakeBodyNorthAnim;
-    // Animation *snakeBodyNorthAnim2;
-    // Animation *snakeBodySouthAnim;
-    // Animation *snakeBodySouthAnim2;
-    // Animation *snakeBodyWestAnim;
-    // Animation *snakeBodyWestAnim2;
-    // Animation *snakeBodyEastAnim;
-    // Animation *snakeBodyEastAnim2;
-
-    // Animation *snakeBodyNorthWestAnim;
-    // Animation *snakeBodyNorthEastAnim;
-    // Animation *snakeBodySouthWestAnim;
-    // Animation *snakeBodySouthEastAnim;
+    Animation *snakePartExplodeAnim;
 
     Image *uiImg;
 
@@ -249,10 +213,19 @@ typedef enum
     KEY_TAPPED
 } KeyState;
 static KeyState keystates[SDL_NUM_SCANCODES];
+static int anyKeyPressed;
 
 KeyState getKey(SDL_Scancode key)
 {
     return keystates[key];
+}
+int getAnyKey()
+{
+    if (anyKeyPressed > 0)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 void putSnake(int x, int y)
@@ -290,12 +263,29 @@ void spawnFood(int foodnum)
     }
     game.foodcount = foodnum;
 }
-void gameInit()
+void gameClassicInit()
 {
-    game.state = GAME_CLASSIC;
-    game.running = true;
+    game.snakeImg = imageLoad("./img/snakemap.png");
+    game.boardImg = imageLoad("./img/grassmap.png");
+    game.uiImg = imageLoad("./img/uimap.png");
+
+    game.lowMus = musicLoad("./snd/testsync.ogg");
+    game.highMus = musicLoad("./snd/testsync2.ogg");
+
+    musicPlay(game.lowMus);
+    musicPlay(game.highMus);
+
     game.level = 0;
-    game.snake.length = 1;
+    int i;
+    for (i = 0; i < game.snake.length; ++i)
+    {
+        game.snake.parts[i] = (SnakePart){};
+        game.snake.parts[i].destroyed = 0;
+        game.snake.parts[i].exploding = 0;
+        printf("%i / %i, %i\n", i, game.snake.length, game.snake.parts[i].destroyed);
+    }
+    game.snake = (Snake){};
+    game.snake.length = 2;
     game.snake.parts[0].last_move_direction = EAST;
     game.snake.next_move_direction = EAST;
     game.snake.move_timer = MOVE_TIMER_RESET;
@@ -352,40 +342,54 @@ void gameInit()
     addFrame(10, 1, 8000);
     animationFinish(1);
 
-    // game.snakeBodyNorthAnim = animationCreate();
-    // addFrame(0, 1, 8000);
-    // // addFrame(0, 2, 8000);
-    // animationFinish(1);
-    // game.snakeBodySouthAnim = animationCreate();
-    // addFrame(6, 2, 8000);
-    // // addFrame(6, 3, 8000);
-    // animationFinish(1);
-    // game.snakeBodyWestAnim = animationCreate();
-    // addFrame(3, 3, 8000);
-    // // addFrame(4, 3, 8000);
-    // animationFinish(1);
-    // game.snakeBodyEastAnim = animationCreate();
-    // addFrame(5, 0, 8000);
-    // // addFrame(6, 0, 8000);
-    // animationFinish(1);
-    // game.snakeBodyNorthAnim2 = animationCreate();
-    // addFrame(0, 2, 8000);
-    // // addFrame(0, 1, 8000);
-    // animationFinish(1);
-    // game.snakeBodySouthAnim2 = animationCreate();
-    // addFrame(6, 3, 8000);
-    // // addFrame(6, 2, 8000);
-    // animationFinish(1);
-    // game.snakeBodyWestAnim2 = animationCreate();
-    // addFrame(4, 3, 8000);
-    // // addFrame(3, 3, 8000);
-    // animationFinish(1);
-    // game.snakeBodyEastAnim2 = animationCreate();
-    // addFrame(6, 0, 8000);
-    // // addFrame(5, 0, 8000);
-    // animationFinish(1);
+    game.snakePartExplodeAnim = animationCreate();
+    addFrame(7, 2, 800);
+    addFrame(8, 2, 800);
+    addFrame(7, 3, 800);
+    addFrame(8, 3, 800);
+    animationFinish(1);
+
+    printf("huh %d\n", game.snakeImg->width);
 
     spawnFood(5);
+}
+void gameClassicExit()
+{
+    imagePoolFreeAll();
+    musicPoolFreeAll();
+    animationPoolFreeAll();
+}
+
+void gameGoTo(GameState state)
+{
+    game.gotostate = state;
+}
+void gameHandleGoTo()
+{
+    if (game.gotostate == game.state)
+        return;
+
+    switch(game.state)
+    {
+        case GAME_CLASSIC:
+            // gameClassicExit();
+            break;
+        case GAME_LOST:
+            gameClassicExit();
+            break;
+        default:
+            break;
+    }
+
+    switch(game.gotostate)
+    {
+        case GAME_CLASSIC:
+            gameClassicInit();
+            break;
+        default:
+            break;
+    }
+    game.state = game.gotostate;
 }
 
 void appInit()
@@ -411,11 +415,9 @@ void appInit()
     Mix_AllocateChannels(MAX_MUSIC);
 
     SDL_RenderSetLogicalSize(app.renderer, screen_width, screen_height);
-    gameInit();
 
-    // get current time
-    prev_time = current_time;
-    current_time = SDL_GetTicks();
+    game.running = true;
+    gameGoTo(GAME_CLASSIC);
 }
 void gameUpdateTime()
 {
@@ -456,10 +458,12 @@ void moveSnake(int xdelta, int ydelta)
 }
 void drawSnake()
 {
-    // change the snake sprite based on snake.last_move_direction
     int i;
     for (i = 0; i < game.snake.length; ++i)
     {
+        if (game.snake.parts[i].destroyed || game.snake.parts[i].exploding)
+            continue;
+
         int next_move_dir = getMoveDirection(game.snake.parts[i - 1].x - game.snake.parts[i].x,
                                             game.snake.parts[i - 1].y - game.snake.parts[i].y);
         // head
@@ -564,10 +568,6 @@ void drawSnake()
                 }
                 else
                 {
-                    // if (i % 2 == 0)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodyNorthAnim);
-                    // if (i % 2 == 1)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodyNorthAnim2);
                     if (i % 2 == 0)
                         imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 1);
                     if (i % 2 == 1)
@@ -585,10 +585,6 @@ void drawSnake()
                 }
                 else
                 {
-                    // if (i % 2 == 0)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodySouthAnim);
-                    // if (i % 2 == 1)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodySouthAnim2);
                     if (i % 2 == 0)
                         imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 2);
                     if (i % 2 == 1)
@@ -606,10 +602,6 @@ void drawSnake()
                 }
                 else
                 {
-                    // if (i % 2 == 0)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodyWestAnim);
-                    // if (i % 2 == 1)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodyWestAnim2);
                     if (i % 2 == 0)
                         imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 3);
                     if (i % 2 == 1)
@@ -627,10 +619,6 @@ void drawSnake()
                 }
                 else
                 {
-                    // if (i % 2 == 0)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodyEastAnim);
-                    // if (i % 2 == 1)
-                    //     imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeBodyEastAnim2);
                     if (i % 2 == 0)
                         imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 5, 0);
                     if (i % 2 == 1)
@@ -669,7 +657,7 @@ void drawFood()
         if (game.foods[i].eaten)
             continue;
 
-        imageDraw(game.boardImg, game.foods[i].x, game.foods[i].y, 2, 1);
+        imageDraw(game.boardImg, game.foods[i].x, game.foods[i].y, 3, 2);
     }
 }
 void drawBoard()
@@ -682,11 +670,43 @@ void drawBoard()
         {
             if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
             {
+                imageDraw(game.boardImg, x, y, 3, 1);
+            }
+            else if (x == game.board.left + 1 && y == game.board.top + 1)
+            {
                 imageDraw(game.boardImg, x, y, 0, 0);
+            }
+            else if (x == game.board.right - 2 && y == game.board.top + 1)
+            {
+                imageDraw(game.boardImg, x, y, 2, 0);
+            }
+            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
+            {
+                imageDraw(game.boardImg, x, y, 0, 2);
+            }
+            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
+            {
+                imageDraw(game.boardImg, x, y, 2, 2);
+            }
+            else if (x == game.board.left + 1)
+            {
+                imageDraw(game.boardImg, x, y, 0, 1);
+            }
+            else if (x == game.board.right - 2)
+            {
+                imageDraw(game.boardImg, x, y, 2, 1);
+            }
+            else if (y == game.board.top + 1)
+            {
+                imageDraw(game.boardImg, x, y, 1, 0);
+            }
+            else if (y == game.board.bottom - 2)
+            {
+                imageDraw(game.boardImg, x, y, 1, 2);
             }
             else
             {
-                imageDraw(game.boardImg, x, y, 2, 0);
+                imageDraw(game.boardImg, x, y, 1, 1);
             }
         }
     }
@@ -701,7 +721,7 @@ void classicRules()
         game.snake.parts[0].y == game.board.top ||
         game.snake.parts[0].y == game.board.bottom - 1)
     {
-        game.state = GAME_LOST;
+        gameGoTo(GAME_LOST);
     }
 
     for (i = 1; i < game.snake.length; ++i)
@@ -709,7 +729,7 @@ void classicRules()
         if (game.snake.parts[0].x == game.snake.parts[i].x &&
             game.snake.parts[0].y == game.snake.parts[i].y)
         {
-            game.state = GAME_LOST;
+            gameGoTo(GAME_LOST);
         }
     }
 
@@ -755,6 +775,7 @@ void sdlEventLoop(SDL_Event *event)
                 if (event->key.repeat)
                     continue;
 
+                anyKeyPressed++;
                 if (keystates[event->key.keysym.scancode] == KEY_RELEASED)
                 {
                     keystates[event->key.keysym.scancode] = KEY_TAPPED;
@@ -763,6 +784,7 @@ void sdlEventLoop(SDL_Event *event)
                 keystates[event->key.keysym.scancode] = KEY_HELD;
                 break;
             case SDL_KEYUP:
+                anyKeyPressed--;
                 keystates[event->key.keysym.scancode] = KEY_RELEASED;
                 break;
             default:
@@ -771,7 +793,21 @@ void sdlEventLoop(SDL_Event *event)
 
     }
 }
-void handleInput()
+void handleGeneralInput()
+{
+    if (getKey(SDL_SCANCODE_ESCAPE) == KEY_TAPPED || getKey(SDL_SCANCODE_F4) == KEY_TAPPED)
+    {
+        game.running = false;
+    }
+}
+void handleLostInput()
+{
+    if (getAnyKey())
+    {
+        gameGoTo(GAME_CLASSIC);
+    }
+}
+void handleClassicInput()
 {
     if (getKey(SDL_SCANCODE_W) == KEY_TAPPED || getKey(SDL_SCANCODE_UP) == KEY_TAPPED)
     {
@@ -802,18 +838,39 @@ void updateKeys()
     }
 }
 
+void snakeExplode()
+{
+    for (int i = 0; i < game.snake.length; ++i)
+    {
+        if (!game.snake.parts[i].destroyed)
+        {
+            game.snake.parts[i].exploding = 1;
+            if (game.snakePartExplodeAnim->frame == game.snakePartExplodeAnim->framecount - 1)
+            {
+                game.snake.parts[i].destroyed = 1;
+                game.snake.parts[i].exploding = 0;
+                game.snakePartExplodeAnim->frame = 0;
+            }
+            imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakePartExplodeAnim);
+            break;
+        }
+    }
+}
+
 static int mouseX, mouseY;
 static SDL_Event event;
-void game_loop()
+void gameLoop()
 {
     SDL_RenderClear(app.renderer);
 
     updateKeys();
     sdlEventLoop(&event);
-    handleInput();
+    handleGeneralInput();
 
     int game_caught_up = 0;
     gameUpdateTime();
+
+    gameHandleGoTo();
 
     switch(game.state)
     {
@@ -821,16 +878,13 @@ void game_loop()
         // menu here
         break;
     case GAME_CLASSIC:
+        handleClassicInput();
         while (!game_caught_up)
         {
             classicRules();
             updateFood();
             musicFadeIn(game.lowMus);
             musicFadeIn(game.highMus);
-            // animationUpdate(game.snakeHeadNorthAnim);
-            // animationUpdate(game.snakeHeadSouthAnim);
-            // animationUpdate(game.snakeHeadWestAnim);
-            // animationUpdate(game.snakeHeadEastAnim);
             animationPoolUpdateAll();
 
             game_caught_up = gameCaughtUp();
@@ -839,14 +893,21 @@ void game_loop()
         drawBoard();
         drawFood();
         drawSnake();
-        imageDraw(game.uiImg, 15, 15, 1, 0);
 
         SDL_GetMouseState(&mouseX, &mouseY);
     break;
     case GAME_LOST:
-        musicFadeOut(game.lowMus);
-        // printf("you lose, loser\n");
-        // lost graphic here
+        handleLostInput();
+        while (!game_caught_up)
+        {
+            musicFadeOut(game.lowMus);
+            animationPoolUpdateAll();
+            game_caught_up = gameCaughtUp();
+        }
+        drawBoard();
+        drawFood();
+        snakeExplode();
+        drawSnake();
         break;
     default:
         break;
@@ -860,24 +921,14 @@ int main(int argc, char **argv)
     srand(time(0));
     appInit();
 
-    game.snakeImg = imageLoad("./img/snakemap.png");
-    game.boardImg = imageLoad("./img/grassmap.png");
-    game.uiImg = imageLoad("./img/uimap.png");
-
-    game.lowMus = musicLoad("./snd/testsync.ogg");
-    game.highMus = musicLoad("./snd/testsync2.ogg");
-
-    musicPlay(game.lowMus);
-    musicPlay(game.highMus);
-
 #ifndef __EMSCRIPTEN__
     while (game.running)
     {
-        game_loop();
+        gameLoop();
     }
     #endif
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(game_loop, 0, 1);
+    emscripten_set_main_loop(gameLoop, 0, 1);
 #endif
 
 

@@ -54,3 +54,31 @@ void imageFree(Image *img)
     img->next = img_pool.free_images;
     img_pool.free_images = img;
 }
+
+void imagePoolFreeAll()
+{
+    int i;
+    for (i = 0; i < MAX_IMAGES; ++i)
+    {
+        if (!img_pool.images[i].img)
+            continue;
+        SDL_DestroyTexture(img_pool.images[i].img);
+
+        img_pool.images[i] = (Image){};
+    }
+    Image *cursor = img_pool.free_images;
+    while (cursor)
+    {
+        cursor = cursor->next;
+        if (!cursor->img)
+        {
+            *cursor = (Image){};
+            continue;
+        }
+
+        SDL_DestroyTexture(cursor->img);
+        *cursor = (Image){};
+    }
+    img_pool.head = 0;
+    img_pool.free_images = NULL;
+}

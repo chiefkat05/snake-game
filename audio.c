@@ -73,3 +73,32 @@ void musicFadeOut(Music *mus)
     mus->fading = 1;
     mus->fade_time = Mix_VolumeChunk(mus->snd, -1);
 }
+
+void musicPoolFreeAll()
+{
+    int i;
+    for (i = 0; i < MAX_MUSIC; ++i)
+    {
+        if (!music_pool.music[i].snd)
+            continue;
+
+        Mix_FreeChunk(music_pool.music[i].snd);
+        music_pool.music[i] = (Music){};
+    }
+
+    Music *cursor = music_pool.free_music;
+    while (cursor)
+    {
+        cursor = cursor->next;
+        if (!cursor->snd)
+        {
+            *cursor = (Music){};
+            continue;
+        }
+
+        Mix_FreeChunk(cursor->snd);
+        *cursor = (Music){};
+    }
+    music_pool.head = 0;
+    music_pool.free_music = NULL;
+}
