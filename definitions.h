@@ -61,13 +61,14 @@ static inline void talkative_verify(bool check, const char *message, int line_nu
 	exit(1);
 }
 
-static double current_time, prev_time, frame_time, accumulated_time;
+static uint32 current_time, prev_time, frame_time, accumulated_time;
 
+// browser runs slower for some reason. Maybe look into it?
 #ifdef __EMSCRIPTEN__
-static double tick_speed = 60.0 / 10.0;
+static uint32 tick_speed = 60;
 #endif
 #ifndef __EMSCRIPTEN__
-static double tick_speed = 60.0 / 500.0;
+static uint32 tick_speed = 2;
 #endif
 
 #endif

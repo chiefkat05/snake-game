@@ -10,14 +10,22 @@
 
 // game plan
 
-// add a 'board' 2d array
-// snake object with a 2d position
-// player input moves the 2d position of the snake
-// draw a small texture at the snake 2d position
-// snake parts that are set to the snake 'head' position on move, limited by the snake's 'length' value
-// draw more sprites on the snake parts
-// if snake head position is on snake part or on the edge of the board, game exits (print 'you lose' or somthng)
-// food item that increases snake length and sets itself to 'eaten' when snake head is on top of
+// get current time from sdl and implement a platform-agnostic tick system
+// remake snake graphics for all the different cases of head/body/tail movement, and apply them in the code
+// make a drawmulti function that can draw a larger texture clip rect (still locked to 16 pixel values)
+// make the ui map with the title screen and buttons
+// make a simple button thing that runs a function on press
+// make the lose screen map
+// make sure the game screens are working and operational, main menu screen -> classic mode screen -> lose screen (upload builds)
+// make puzzle mode button and add game screen with more hands-on board/food/snake positioning functions (only one level)
+// make a different logic loop and input loop for puzzle mode
+// separate game init loop and have more screen-independant variable names where applicable.
+//      There will be one of every spritemap as a pointer in the game struct, and all the music too. Each screen should have
+//      an init function where it sets up music/sprites/etc, and a close function where it 'frees' all the resources that it
+//      was using. There will be a screen for menu, settings (if possible), win, lose, classic mode setup, classic mode, and
+//      one screen for each puzzle mode level.
+
+// animations are going to be so hard fuck
 
 Application app;
 ImagePool img_pool;
@@ -127,7 +135,7 @@ typedef struct
 } Food;
 
 #define MAX_SNAKEPARTS 64
-#define MOVE_TIMER_RESET 500.0
+#define MOVE_TIMER_RESET 5000.0
 typedef struct
 {
     int x, y;
@@ -270,6 +278,26 @@ void appInit()
 
     SDL_RenderSetLogicalSize(app.renderer, screen_width, screen_height);
     gameInit();
+
+    // get current time
+    prev_time = current_time;
+    current_time = SDL_GetTicks();
+}
+void gameUpdateTime()
+{
+    prev_time = current_time;
+    current_time = SDL_GetTicks();
+    frame_time = current_time - prev_time;
+    accumulated_time += frame_time;
+}
+int gameCaughtUp()
+{
+    if (accumulated_time >= tick_speed)
+    {
+        accumulated_time -= tick_speed;
+        return 0;
+    }
+    return 1;
 }
 
 void moveSnake(int xdelta, int ydelta)
@@ -295,7 +323,6 @@ void moveSnake(int xdelta, int ydelta)
 void drawSnake()
 {
     // change the snake sprite based on snake.last_move_direction
-
     int i;
     for (i = 0; i < game.snake.length; ++i)
     {
@@ -395,6 +422,11 @@ void gameRules()
     }
 
     game.snake.move_timer -= tick_speed * (1.0 + (double)game.snake.length / 10.0);
+
+    // would allow player sideways movement to be instant
+    // if (game.snake.move_timer <= 0.0 ||
+    //     (game.snake.next_move_direction != game.snake.parts[0].last_move_direction &&
+    //      game.snake.next_move_direction != getReverseDirection(game.snake.parts[0].last_move_direction)))
     if (game.snake.move_timer <= 0.0)
     {
         game.snake.move_timer = MOVE_TIMER_RESET;
@@ -440,19 +472,19 @@ void sdlEventLoop(SDL_Event *event)
 }
 void handleInput()
 {
-    if (getKey(SDL_SCANCODE_W) == KEY_TAPPED)
+    if (getKey(SDL_SCANCODE_W) == KEY_TAPPED || getKey(SDL_SCANCODE_UP) == KEY_TAPPED)
     {
         game.snake.next_move_direction = NORTH;
     }
-    if (getKey(SDL_SCANCODE_S) == KEY_TAPPED)
+    if (getKey(SDL_SCANCODE_S) == KEY_TAPPED || getKey(SDL_SCANCODE_DOWN) == KEY_TAPPED)
     {
         game.snake.next_move_direction = SOUTH;
     }
-    if (getKey(SDL_SCANCODE_A) == KEY_TAPPED)
+    if (getKey(SDL_SCANCODE_A) == KEY_TAPPED || getKey(SDL_SCANCODE_LEFT) == KEY_TAPPED)
     {
         game.snake.next_move_direction = WEST;
     }
-    if (getKey(SDL_SCANCODE_D) == KEY_TAPPED)
+    if (getKey(SDL_SCANCODE_D) == KEY_TAPPED || getKey(SDL_SCANCODE_RIGHT) == KEY_TAPPED)
     {
         game.snake.next_move_direction = EAST;
     }
@@ -479,23 +511,31 @@ void game_loop()
     sdlEventLoop(&event);
     handleInput();
 
+    int game_caught_up = 0;
+    gameUpdateTime();
+
     switch(game.state)
     {
     case GAME_MENU:
         // menu here
         break;
     case GAME_CLASSIC:
-        gameRules();
-        
+
+        while (!game_caught_up)
+        {
+            gameRules();
+            updateFood();
+            musicFadeIn(game.lowMus);
+            musicFadeIn(game.highMus);
+            game_caught_up = gameCaughtUp();
+        }
+
         drawBoard();
-        updateFood();
         drawFood();
         drawSnake();
         imageDraw(game.uiImg, 15, 15, 1, 0);
 
         SDL_GetMouseState(&mouseX, &mouseY);
-        musicFadeIn(game.lowMus);
-        musicFadeIn(game.highMus);
     break;
     case GAME_LOST:
         musicFadeOut(game.lowMus);

@@ -29,13 +29,12 @@ Image *imageAlloc()
         return output;
     }
 
-    verify(false, "no more images available, please tell chiefkat to increase the limit or implement an image system that doesn't suck", __LINE__);
-    return NULL;
+    verify(false, "no more images available, please tell chiefkat to increase the limit or implement a better image system", __LINE__);
+    return NULL; // won't get here
 }
 void imageLoadSurfaceImage(Image *img, const char *path)
 {
     img->img = loadSurfaceImage(path, &img->xcount, &img->ycount, &img->width, &img->height);
-    // img->clip_rect = (SDL_Rect){0, 0, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
     img->clip_rect = (SDL_Rect){0, 0, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
 }
 Image *imageLoad(const char *path)

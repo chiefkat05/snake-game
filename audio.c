@@ -49,7 +49,7 @@ void musicFadeIn(Music *mus)
         }
         else
         {
-            mus->fade_time += 0.1 * tick_speed;
+            mus->fade_time += 0.01 * (double)tick_speed;
         }
         Mix_VolumeChunk(mus->snd, (int)mus->fade_time);
         return;
@@ -67,7 +67,7 @@ void musicFadeOut(Music *mus)
         }
         else
         {
-            mus->fade_time -= 0.1 * tick_speed;
+            mus->fade_time -= 0.01 * (double)tick_speed;
         }
         Mix_VolumeChunk(mus->snd, (int)mus->fade_time);
         return;
