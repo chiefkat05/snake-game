@@ -64,10 +64,10 @@ static inline void talkative_verify(bool check, const char *message, int line_nu
 static double current_time, prev_time, frame_time, accumulated_time;
 
 #ifdef __EMSCRIPTEN__
-static double tick_speed = 60.0 / 80.0;
+static double tick_speed = 60.0 / 10.0;
 #endif
 #ifndef __EMSCRIPTEN__
-static double tick_speed = 60.0 / 200.0;
+static double tick_speed = 60.0 / 500.0;
 #endif
 
 #endif

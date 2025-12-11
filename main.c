@@ -137,7 +137,6 @@ typedef struct
 {
     SnakePart parts[MAX_SNAKEPARTS];
     int length;
-    Direction last_move_direction;
     Direction next_move_direction;
     double move_timer;
 } Snake;
@@ -238,7 +237,7 @@ void gameInit()
     game.running = true;
     game.level = 0;
     game.snake.length = 1;
-    game.snake.last_move_direction = EAST;
+    game.snake.parts[0].last_move_direction = EAST;
     game.snake.next_move_direction = EAST;
     game.snake.move_timer = MOVE_TIMER_RESET;
     putSnake(BOARD_WIDTH / 2, BOARD_HEIGHT / 2);
@@ -275,7 +274,7 @@ void appInit()
 
 void moveSnake(int xdelta, int ydelta)
 {
-    if (getMoveDirection(xdelta, ydelta) == getReverseDirection(game.snake.last_move_direction))
+    if (getMoveDirection(xdelta, ydelta) == getReverseDirection(game.snake.parts[0].last_move_direction))
         return;
     
     int i;
@@ -291,7 +290,7 @@ void moveSnake(int xdelta, int ydelta)
     game.snake.parts[0].x += xdelta;
     game.snake.parts[0].y += ydelta;
 
-    game.snake.last_move_direction = getMoveDirection(xdelta, ydelta);
+    game.snake.parts[0].last_move_direction = getMoveDirection(xdelta, ydelta);
 }
 void drawSnake()
 {
@@ -399,8 +398,8 @@ void gameRules()
     if (game.snake.move_timer <= 0.0)
     {
         game.snake.move_timer = MOVE_TIMER_RESET;
-        if (game.snake.last_move_direction == getReverseDirection(game.snake.next_move_direction))
-            game.snake.next_move_direction = game.snake.last_move_direction;
+        if (game.snake.parts[0].last_move_direction == getReverseDirection(game.snake.next_move_direction))
+            game.snake.next_move_direction = game.snake.parts[0].last_move_direction;
         moveSnake(getXNormalFromDirection(game.snake.next_move_direction), getYNormalFromDirection(game.snake.next_move_direction));
     }
 }
