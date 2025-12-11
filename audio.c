@@ -27,10 +27,8 @@ Music *musicLoad(const char *path)
     loadMusicMixLoadWAV(mus, path);
     return mus;
 }
-void musicPlay(Music *mus, double loopstart)
+void musicPlay(Music *mus)
 {
-    // Mix_Set
-    // need to set the music to start a few seconds past the junk data in the mp3
     Mix_PlayChannel(-1, mus->snd, -1);
     Mix_VolumeChunk(mus->snd, 0);
 }
