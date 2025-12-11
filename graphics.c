@@ -35,6 +35,7 @@ Image *imageAlloc()
 void imageLoadSurfaceImage(Image *img, const char *path)
 {
     img->img = loadSurfaceImage(path, &img->xcount, &img->ycount, &img->width, &img->height);
+    // img->clip_rect = (SDL_Rect){0, 0, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
     img->clip_rect = (SDL_Rect){0, 0, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
 }
 Image *imageLoad(const char *path)
@@ -43,11 +44,11 @@ Image *imageLoad(const char *path)
     imageLoadSurfaceImage(img, path);
     return img;
 }
-void imageDraw(Image *img, int x, int y)
+void imageDraw(Image *img, int x, int y, int tx, int ty)
 {
-    img->clip_rect.x = x;
-    img->clip_rect.y = y;
-    SDL_RenderCopy(app.renderer, img->img, &img->clip_rect, NULL);
+    SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
+    img->clip_rect = (SDL_Rect){.x = tx * IMG_PIXEL_SIZE, .y = ty * IMG_PIXEL_SIZE, .w = IMG_PIXEL_SIZE, .h = IMG_PIXEL_SIZE};
+    SDL_RenderCopy(app.renderer, img->img, &img->clip_rect, &scale_rect);
 }
 void imageFree(Image *img)
 {

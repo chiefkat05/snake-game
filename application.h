@@ -7,7 +7,6 @@ typedef struct
 {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    int min_window_side;
 } Application;
 extern Application app;
 
