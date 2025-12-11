@@ -80,6 +80,44 @@ Direction getReverseDirection(Direction direction)
     }
     return 0; // won't get here either
 }
+int getXNormalFromDirection(Direction direction)
+{
+    switch(direction)
+    {
+        case WEST:
+        case NORTHWEST:
+        case SOUTHWEST:
+            return -1;
+        case EAST:
+        case NORTHEAST:
+        case SOUTHEAST:
+            return 1;
+        case NORTH:
+        case SOUTH:
+        default:
+            return 0;
+    }
+    return 0;
+}
+int getYNormalFromDirection(Direction direction)
+{
+    switch(direction)
+    {
+        case NORTH:
+        case NORTHWEST:
+        case NORTHEAST:
+            return -1;
+        case SOUTH:
+        case SOUTHWEST:
+        case SOUTHEAST:
+            return 1;
+        case WEST:
+        case EAST:
+        default:
+            return 0;
+    }
+    return 0;
+}
 
 #define MAX_FOODS 16
 typedef struct
@@ -93,6 +131,7 @@ typedef struct
 typedef struct
 {
     int x, y;
+    Direction last_move_direction;
 } SnakePart;
 typedef struct
 {
@@ -242,8 +281,11 @@ void moveSnake(int xdelta, int ydelta)
     int i;
     for (i = game.snake.length; i > 0; --i)
     {
+        int partxdelta = game.snake.parts[i - 1].x - game.snake.parts[i].x;
+        int partydelta = game.snake.parts[i - 1].y - game.snake.parts[i].y;
         game.snake.parts[i].x = game.snake.parts[i - 1].x;
         game.snake.parts[i].y = game.snake.parts[i - 1].y;
+        game.snake.parts[i].last_move_direction = getMoveDirection(partxdelta, partydelta);
     }
 
     game.snake.parts[0].x += xdelta;
@@ -258,6 +300,10 @@ void drawSnake()
     int i;
     for (i = 0; i < game.snake.length; ++i)
     {
+        if (game.snake.parts[i].x == 0 && game.snake.parts[i].y == 0)
+        {
+            printf("hello\n");
+        }
         if (i == 0)
             imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 2, 2);
         else if (i == game.snake.length - 1)
@@ -343,6 +389,8 @@ void gameRules()
             game.snake.parts[0].y == game.foods[i].y)
         {
             game.foods[i].eaten = 1;
+            game.snake.parts[game.snake.length].x = game.snake.parts[game.snake.length - 1].x - getXNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
+            game.snake.parts[game.snake.length].y = game.snake.parts[game.snake.length - 1].y - getYNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
             ++game.snake.length;
         }
     }
@@ -351,23 +399,9 @@ void gameRules()
     if (game.snake.move_timer <= 0.0)
     {
         game.snake.move_timer = MOVE_TIMER_RESET;
-        switch(game.snake.next_move_direction)
-        {
-            case WEST:
-                moveSnake(-1, 0);
-                break;
-            case EAST:
-                moveSnake(1, 0);
-                break;
-            case NORTH:
-                moveSnake(0, -1);
-                break;
-            case SOUTH:
-                moveSnake(0, 1);
-                break;
-            default:
-                break;
-        }
+        if (game.snake.last_move_direction == getReverseDirection(game.snake.next_move_direction))
+            game.snake.next_move_direction = game.snake.last_move_direction;
+        moveSnake(getXNormalFromDirection(game.snake.next_move_direction), getYNormalFromDirection(game.snake.next_move_direction));
     }
 }
 
@@ -466,7 +500,7 @@ void game_loop()
     break;
     case GAME_LOST:
         musicFadeOut(game.lowMus);
-        printf("you lose, loser\n");
+        // printf("you lose, loser\n");
         // lost graphic here
         break;
     default:
