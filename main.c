@@ -5,6 +5,7 @@
 #include "animation.h"
 #include "direction.h"
 #include "keystate.h"
+#include "text.h"
 
 #define window_width 1280
 #define window_height 720
@@ -13,14 +14,13 @@
 
 // game plan
 
-// make sure the game screens are working and operational, main menu screen -> classic mode screen -> lose screen (upload builds)
-// make puzzle mode button and add game screen with more hands-on board/food/snake positioning functions (only one level)
+// make puzzle mode button and add puzzle 1-1 game screen with more hands-on board/food/snake positioning functions (only one level)
 // make a different logic loop and input loop for puzzle mode
-// separate game init loop and have more screen-independant variable names where applicable.
-//      There will be one of every spritemap as a pointer in the game struct, and all the music too. Each screen should have
-//      an init function where it sets up music/sprites/etc, and a close function where it 'frees' all the resources that it
-//      was using. There will be a screen for menu, settings (if possible), win, lose, classic mode setup, classic mode, and
-//      one screen for each puzzle mode level.
+// make a win condition for 1-1 and then do it again two more times for three total grass levels
+// make the puzzle select screen with a different play button to access from the main menu
+// have little icons for the three puzzle levels, and greyed out versions for not-unlocked-yet.
+// make it so that winning a level boots you to the level select screen (after a win animation? just same as lose animation?)
+//      and unlocks the next level (with a little animation if you're willing after you confirm it works)
 
 Application app;
 ImagePool img_pool;
@@ -55,8 +55,8 @@ typedef struct
 typedef struct
 {
     int x, y;
-    int activated;
-} Controller;
+    int activated, alert, disabled;
+} Operator;
 
 #define BOARD_WIDTH 16
 #define BOARD_HEIGHT 16
@@ -81,7 +81,7 @@ typedef enum
 
 typedef struct
 {
-    int running;
+    int running, transitioning;
     GameState state, gotostate;
     int level;
 
@@ -90,6 +90,8 @@ typedef struct
     int foodcount;
 
     Board board;
+
+    TextFont font;
 
     Image *boardImg;
     Image *snakeImg;
@@ -112,31 +114,53 @@ typedef struct
     Image *loseTextImg;
     Animation *loseAnim;
 
-    Image *transitionImg;
-    Animation *transitionAnim;
+    // Image *transitionImg;
+    // Animation *transitionAnim;
 
     Image *menuImg;
     Animation *menuCursorAnim;
     Animation *menuCursorWaitAnim;
-    Controller menuCursor;
+    Operator menuCursor;
 
     Music *lowMus;
     Music *highMus;
 } Game;
 static Game game;
 
-void moveController(Controller *controller, int xdelta, int ydelta)
+void moveOperator(Operator *operator, int xdelta, int ydelta)
 {
-    controller->x += xdelta;
-    controller->y += ydelta;
+    operator->x += xdelta;
+    operator->y += ydelta;
 }
-void activateController(Controller *controller)
+void activateOperator(Operator *operator)
 {
-    controller->activated = 1;
+    if (!operator->disabled && operator->alert)
+    {
+        operator->activated = 1;
+        operator->alert = 0;
+    }
 }
-void deactivateController(Controller *controller)
+void deactivateOperator(Operator *operator)
 {
-    controller->activated = 0;
+    operator->activated = 0;
+}
+void disableOperator(Operator *operator)
+{
+    operator->disabled = 1;
+    operator->alert = 0;
+    operator->activated = 0;
+}
+void enableOperator(Operator *operator)
+{
+    operator->disabled = 0;
+}
+void alertOperator(Operator *operator)
+{
+    operator->alert = 1;
+}
+void settleOperator(Operator *operator)
+{
+    operator->alert = 0;
 }
 
 void putSnake(int x, int y)
@@ -261,6 +285,12 @@ void gameMenuInit()
     game.menuCursor.x = screen_width / (2 * IMG_PIXEL_SIZE);
     game.menuCursor.y = screen_height / (2 * IMG_PIXEL_SIZE);
 }
+void gameMenuExit()
+{
+    imagePoolFreeAll();
+    musicPoolFreeAll();
+    animationPoolFreeAll();
+}
 void gameClassicInit()
 {
     game.snakeImg = imageLoad("./img/snakemap.png");
@@ -345,6 +375,8 @@ void gameClassicInit()
     animationFinish(1);
 
     spawnFood(16);
+
+    fontLoad(&game.font, "./img/textmap.png", "0123456789:?!.,-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 }
 void gameClassicExit()
 {
@@ -384,12 +416,45 @@ void gameGoTo(GameState state)
 void gameHandleGoTo()
 {
     if (game.gotostate == game.state)
+    {
+        // game.transitioning = 0;
         return;
-        // do transition here too
+    }
+    
+    // if (!game.transitionImg)
+    // {
+    //     game.transitionImg = imageLoad("./img/transitionmap.png");
+    // }
+    // if (!game.transitionAnim)
+    // {
+    //     game.transitionAnim = animationCreate();
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     addFrame(0, 0, 800);
+    //     animationFinish(0);
+    // }
+    // animationPoolUpdateAll();
+    // game.transitioning = 1;
+    // imageDrawAnimated(game.transitionImg, 0, 16 - game.transitionAnim->frame, game.transitionAnim);
+    // if (game.transitionAnim->frame < game.transitionAnim->framecount - 1)
+    // {
+    //     printf("animation? %i\n", game.transitionAnim->frame);
+    //     return;
+    // }
 
     switch(game.state)
     {
         case GAME_MENU:
+            gameMenuExit();
             break;
         case GAME_CLASSIC:
             if (game.gotostate != GAME_LOST)
@@ -743,6 +808,8 @@ void classicRules()
 }
 void menuRules()
 {
+    settleOperator(&game.menuCursor);
+
     if (game.menuCursor.x > 15)
         game.menuCursor.x = 15;
     if (game.menuCursor.x < 0)
@@ -752,30 +819,43 @@ void menuRules()
     if (game.menuCursor.y < 0)
         game.menuCursor.y = 0;
 
-    if (game.menuCursor.x > 2 && game.menuCursor.x < 6 && game.menuCursor.y == 13 && game.menuCursor.activated)
+    if (game.menuCursor.x > 1 && game.menuCursor.x < 8 && game.menuCursor.y >= 8 && game.menuCursor.y <= 10)
     {
-        gameGoTo(GAME_CLASSIC);
+        alertOperator(&game.menuCursor);
+        if (game.menuCursor.activated)
+            gameGoTo(GAME_PUZZLE);
     }
-    if (game.menuCursor.x > 9 && game.menuCursor.x < 14 && game.menuCursor.y == 13 && game.menuCursor.activated)
+    if (game.menuCursor.x > 9 && game.menuCursor.x < 15 && game.menuCursor.y >= 8 && game.menuCursor.y <= 10)
     {
-        game.running = false;
+        alertOperator(&game.menuCursor);
+        if (game.menuCursor.activated)
+            gameGoTo(GAME_CLASSIC);
+    }
+    if (game.menuCursor.x > 11 && game.menuCursor.y > 14)
+    {
+        alertOperator(&game.menuCursor);
+        if (game.menuCursor.activated)
+        {
+            disableOperator(&game.menuCursor);
+            game.running = false;
+        }
     }
 }
 void drawMenuCursor()
 {
-    // if (game.transitioning)
-    // {
-    //     imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorWaitAnim);
-    // }
-    if (game.menuCursor.x > 2 && game.menuCursor.x < 6 && game.menuCursor.y == 13 ||
-        game.menuCursor.x > 9 && game.menuCursor.x < 14 && game.menuCursor.y == 13)
+    if (game.menuCursor.alert)
     {
-        imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 16, 3);
+        if (game.menuCursor.activated)
+            imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 17, 3);
+        if (!game.menuCursor.activated)
+            imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 16, 3);
+    }
+    else if (game.menuCursor.disabled)
+    {
+        imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorWaitAnim);
     }
     else
-    {
         imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorAnim);
-    }
 }
 
 void sdlEventLoop(SDL_Event *event)
@@ -827,7 +907,7 @@ void handleGeneralInput()
 }
 void handleLostInput()
 {
-    if (getAnyKey() && game.snake.parts[game.snake.length - 1].destroyed)
+    if (getAnyKey() && !getKey(SDL_SCANCODE_ESCAPE) && game.snake.parts[game.snake.length - 1].destroyed)
     {
         gameGoTo(GAME_CLASSIC);
     }
@@ -855,23 +935,23 @@ void handleMenuInput()
 {
     if (getKey(SDL_SCANCODE_W) == KEY_TAPPED || getKey(SDL_SCANCODE_UP) == KEY_TAPPED)
     {
-        moveController(&game.menuCursor, 0, -1);
+        moveOperator(&game.menuCursor, 0, -1);
     }
     if (getKey(SDL_SCANCODE_S) == KEY_TAPPED || getKey(SDL_SCANCODE_DOWN) == KEY_TAPPED)
     {
-        moveController(&game.menuCursor, 0, 1);
+        moveOperator(&game.menuCursor, 0, 1);
     }
     if (getKey(SDL_SCANCODE_A) == KEY_TAPPED || getKey(SDL_SCANCODE_LEFT) == KEY_TAPPED)
     {
-        moveController(&game.menuCursor, -1, 0);
+        moveOperator(&game.menuCursor, -1, 0);
     }
     if (getKey(SDL_SCANCODE_D) == KEY_TAPPED || getKey(SDL_SCANCODE_RIGHT) == KEY_TAPPED)
     {
-        moveController(&game.menuCursor, 1, 0);
+        moveOperator(&game.menuCursor, 1, 0);
     }
     if (getKey(SDL_SCANCODE_SPACE) == KEY_TAPPED || getKey(SDL_SCANCODE_RETURN) == KEY_TAPPED || getKey(SDL_SCANCODE_Z) == KEY_TAPPED)
     {
-        activateController(&game.menuCursor);
+        activateOperator(&game.menuCursor);
     }
 }
 void updateKeys()
@@ -920,10 +1000,12 @@ void gameLoop()
 
     gameHandleGoTo();
 
+    char scorebuf[128];
+
     switch(game.state)
     {
     case GAME_MENU:
-        deactivateController(&game.menuCursor);
+        deactivateOperator(&game.menuCursor);
         handleMenuInput();
         while (!game_caught_up)
         {
@@ -934,8 +1016,10 @@ void gameLoop()
         }
 
         imageDrawLarge(game.menuImg, 0, 0, 0, 0, 16, 16);
-        imageDrawLarge(game.menuImg, 2, 12, 16, 0, 4, 2);
-        imageDrawLarge(game.menuImg, 10, 12, 20, 0, 4, 2);
+        imageDrawLarge(game.menuImg, 12, 14, 20, 0, 4, 2);
+
+        imageDrawLarge(game.menuImg, 2, 8, 24, 0, 5, 2);
+        imageDrawLarge(game.menuImg, 10, 8, 24, 2, 5, 2);
         drawMenuCursor();
         break;
     case GAME_CLASSIC:
@@ -954,6 +1038,8 @@ void gameLoop()
         drawBoard();
         drawFood();
         drawSnake();
+        sprintf(scorebuf, "%s%d", "Score: ", game.snake.length - 2);
+        imageDrawText(scorebuf, &game.font, 0, 0);
         break;
     case GAME_LOST:
         handleLostInput();
@@ -976,8 +1062,13 @@ void gameLoop()
                 imageDrawLarge(game.loseTextImg, 0, 6, 0, 30, 16, 2);
             }
         }
+        imageDrawText(scorebuf, &game.font, game.loseAnim->frame / 3, (float)game.loseAnim->frame / 1.5f);
         break;
     default:
+        // while (!game_caught_up)
+        // {
+        //     animationPoolUpdateAll();
+        // }
         break;
     }
 

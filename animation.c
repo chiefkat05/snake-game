@@ -25,6 +25,7 @@ Animation *animationCreate()
 {
     Animation *anim = animationAlloc();
 
+    *anim = (Animation){};
     anim_pool.editing_animation = anim;
     anim_pool.editing_animation->framecount = 0;
 
