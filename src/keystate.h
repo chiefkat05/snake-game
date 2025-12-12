@@ -7,12 +7,14 @@ typedef enum
 {
     KEY_RELEASED,
     KEY_HELD,
-    KEY_TAPPED
+    KEY_TAPPED,
+    KEY_JUSTRELEASED
 } KeyState;
 extern KeyState keystates[SDL_NUM_SCANCODES];
 extern int anyKeyPressed;
 
 KeyState getKey(SDL_Scancode key);
 int getAnyKey();
+void updateKeys();
 
 #endif

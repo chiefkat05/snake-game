@@ -1,26 +1,4 @@
-#include "definitions.h"
-#include "graphics.h"
-#include "audio.h"
-#include "application.h"
-#include "animation.h"
-#include "direction.h"
-#include "keystate.h"
-#include "text.h"
-
-#define window_width 1280
-#define window_height 720
-#define screen_width 128
-#define screen_height 128
-
-// game plan
-
-// make puzzle mode button and add puzzle 1-1 game screen with more hands-on board/food/snake positioning functions (only one level)
-// make a different logic loop and input loop for puzzle mode
-// make a win condition for 1-1 and then do it again two more times for three total grass levels
-// make the puzzle select screen with a different play button to access from the main menu
-// have little icons for the three puzzle levels, and greyed out versions for not-unlocked-yet.
-// make it so that winning a level boots you to the level select screen (after a win animation? just same as lose animation?)
-//      and unlocks the next level (with a little animation if you're willing after you confirm it works)
+#include "snakegame.h"
 
 Application app;
 ImagePool img_pool;
@@ -28,140 +6,8 @@ MusicPool music_pool;
 AnimationPool anim_pool;
 KeyState keystates[SDL_NUM_SCANCODES];
 int anyKeyPressed;
-
-#define MAX_FOODS 16
-typedef struct
-{
-    int x, y;
-    int eaten;
-} Food;
-
-#define MAX_SNAKEPARTS 64
-#define MOVE_TIMER_RESET 5000.0
-typedef struct
-{
-    int x, y;
-    Direction last_move_direction;
-    int destroyed, exploding;
-} SnakePart;
-typedef struct
-{
-    SnakePart parts[MAX_SNAKEPARTS];
-    int length;
-    Direction next_move_direction;
-    double move_timer;
-} Snake;
-
-typedef struct
-{
-    int x, y;
-    int activated, alert, disabled;
-} Operator;
-
-#define BOARD_WIDTH 16
-#define BOARD_HEIGHT 16
-typedef struct
-{
-    int texture[BOARD_WIDTH][BOARD_HEIGHT][2];
-    int width, height;
-
-    int left, right, top, bottom;
-} Board;
-
-typedef enum
-{
-    GAME_MENU,
-    GAME_SELECT,
-    GAME_PUZZLE,
-    GAME_SETTINGS,
-    GAME_CLASSIC,
-    GAME_LOST,
-    GAME_WON
-} GameState;
-
-typedef struct
-{
-    int running, transitioning;
-    GameState state, gotostate;
-    int level;
-
-    Snake snake;
-    Food foods[MAX_FOODS];
-    int foodcount;
-
-    Board board;
-
-    TextFont font;
-
-    Image *boardImg;
-    Image *snakeImg;
-    Animation *snakeHeadNorthAnim;
-    Animation *snakeHeadSouthAnim;
-    Animation *snakeHeadWestAnim;
-    Animation *snakeHeadEastAnim;
-
-    Animation *snakeHeadWestNorthAnim;
-    Animation *snakeHeadWestSouthAnim;
-    Animation *snakeHeadEastNorthAnim;
-    Animation *snakeHeadEastSouthAnim;
-    Animation *snakeHeadNorthWestAnim;
-    Animation *snakeHeadNorthEastAnim;
-    Animation *snakeHeadSouthWestAnim;
-    Animation *snakeHeadSouthEastAnim;
-
-    Animation *snakePartExplodeAnim;
-
-    Image *loseTextImg;
-    Animation *loseAnim;
-
-    // Image *transitionImg;
-    // Animation *transitionAnim;
-
-    Image *menuImg;
-    Animation *menuCursorAnim;
-    Animation *menuCursorWaitAnim;
-    Operator menuCursor;
-
-    Music *lowMus;
-    Music *highMus;
-} Game;
-static Game game;
-
-void moveOperator(Operator *operator, int xdelta, int ydelta)
-{
-    operator->x += xdelta;
-    operator->y += ydelta;
-}
-void activateOperator(Operator *operator)
-{
-    if (!operator->disabled && operator->alert)
-    {
-        operator->activated = 1;
-        operator->alert = 0;
-    }
-}
-void deactivateOperator(Operator *operator)
-{
-    operator->activated = 0;
-}
-void disableOperator(Operator *operator)
-{
-    operator->disabled = 1;
-    operator->alert = 0;
-    operator->activated = 0;
-}
-void enableOperator(Operator *operator)
-{
-    operator->disabled = 0;
-}
-void alertOperator(Operator *operator)
-{
-    operator->alert = 1;
-}
-void settleOperator(Operator *operator)
-{
-    operator->alert = 0;
-}
+static int mouseX, mouseY;
+static SDL_Event event;
 
 void putSnake(int x, int y)
 {
@@ -262,6 +108,14 @@ void spawnFood(int foodnum)
     }
     game.foodcount = foodnum;
 }
+void putFood(int x, int y)
+{
+    x += game.board.left;
+    y += game.board.top;
+    game.foods[game.foodcount].x = x;
+    game.foods[game.foodcount].y = y;
+    ++game.foodcount;
+}
 void gameMenuInit()
 {
     game.menuImg = imageLoad("./img/mainmenumap.png");
@@ -285,13 +139,11 @@ void gameMenuInit()
     game.menuCursor.x = screen_width / (2 * IMG_PIXEL_SIZE);
     game.menuCursor.y = screen_height / (2 * IMG_PIXEL_SIZE);
 }
-void gameMenuExit()
+void gameSelectInit()
 {
-    imagePoolFreeAll();
-    musicPoolFreeAll();
-    animationPoolFreeAll();
+    game.selectImg = imageLoad("./img/selectmap.png");
 }
-void gameClassicInit()
+void baseGameInit()
 {
     game.snakeImg = imageLoad("./img/snakemap.png");
     game.boardImg = imageLoad("./img/grassmap.png");
@@ -299,10 +151,9 @@ void gameClassicInit()
     game.lowMus = musicLoad("./snd/testsync.ogg");
     game.highMus = musicLoad("./snd/testsync2.ogg");
 
-    musicPlay(game.lowMus);
-    musicPlay(game.highMus);
+    musicPlay(game.lowMus, __LINE__);
+    musicPlay(game.highMus, __LINE__);
 
-    game.level = 0;
     int i;
     for (i = 0; i < game.snake.length; ++i)
     {
@@ -314,8 +165,11 @@ void gameClassicInit()
     game.snake.next_move_direction = EAST;
     game.snake.move_timer = MOVE_TIMER_RESET;
     putSnake(BOARD_WIDTH / 2, BOARD_HEIGHT / 2);
-    makeBoard(16, 16);
-    setBoardGrass();
+    game.foodcount = 0;
+    for (i = 0; i < MAX_FOODS; ++i)
+    {
+        game.foods[i].eaten = 0;
+    }
 
     game.snakeHeadNorthAnim = animationCreate();
     addFrame(0, 0, 8000);
@@ -374,11 +228,63 @@ void gameClassicInit()
     addFrame(8, 3, 400);
     animationFinish(1);
 
-    spawnFood(16);
-
-    fontLoad(&game.font, "./img/textmap.png", "0123456789:?!.,-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+    fontLoad(&game.font, "./img/textmap.png", "0123456789:?!.,-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/");
 }
-void gameClassicExit()
+void gameClassicInit()
+{
+    baseGameInit();
+
+    makeBoard(16, 16);
+    setBoardGrass();
+    spawnFood(16);
+}
+void gamePuzzleInit()
+{
+    baseGameInit();
+
+    game.winTextImg = imageLoad("./img/winmap.png");
+    game.winAnim = animationCreate();
+    addFrame(0, 0, 800);
+    addFrame(0, 2, 800);
+    addFrame(0, 4, 800);
+    addFrame(0, 6, 800);
+    addFrame(0, 8, 800);
+    addFrame(0, 10, 800);
+    addFrame(0, 12, 800);
+    animationFinish(0);
+    animationPause(game.winAnim);
+
+    switch(game.current_level)
+    {
+        case 0:
+            makeBoard(5, 5);
+            putFood(1, 2);
+            putFood(2, 3);
+            break;
+        case 1:
+            makeBoard(6, 6);
+            putFood(2, 2);
+            putFood(3, 2);
+            putFood(2, 4);
+            putFood(4, 3);
+            break;
+        case 2:
+            makeBoard(6, 8);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        default:
+            break;
+    }
+    setBoardGrass();
+}
+void gameSceneExit()
 {
     imagePoolFreeAll();
     musicPoolFreeAll();
@@ -412,56 +318,40 @@ void gameLoseInit()
 void gameGoTo(GameState state)
 {
     game.gotostate = state;
+    if (game.gotostate >= GAME_PUZZLE1 && game.gotostate <= GAME_PUZZLE3)
+    {
+        game.current_level = game.gotostate - GAME_PUZZLE1;
+    }
 }
 void gameHandleGoTo()
 {
     if (game.gotostate == game.state)
-    {
-        // game.transitioning = 0;
         return;
-    }
-    
-    // if (!game.transitionImg)
-    // {
-    //     game.transitionImg = imageLoad("./img/transitionmap.png");
-    // }
-    // if (!game.transitionAnim)
-    // {
-    //     game.transitionAnim = animationCreate();
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     addFrame(0, 0, 800);
-    //     animationFinish(0);
-    // }
-    // animationPoolUpdateAll();
-    // game.transitioning = 1;
-    // imageDrawAnimated(game.transitionImg, 0, 16 - game.transitionAnim->frame, game.transitionAnim);
-    // if (game.transitionAnim->frame < game.transitionAnim->framecount - 1)
-    // {
-    //     printf("animation? %i\n", game.transitionAnim->frame);
-    //     return;
-    // }
 
     switch(game.state)
     {
         case GAME_MENU:
-            gameMenuExit();
+            if (game.gotostate != GAME_SELECT)
+                gameSceneExit();
+            break;
+        case GAME_SELECT:
+            if (game.gotostate != GAME_MENU)
+                gameSceneExit();
             break;
         case GAME_CLASSIC:
-            if (game.gotostate != GAME_LOST)
-                gameClassicExit();
+            if (game.gotostate != GAME_LOST_CLASSIC)
+                gameSceneExit();
             break;
-        case GAME_LOST:
-            gameClassicExit();
+        case GAME_PUZZLE1:
+        case GAME_PUZZLE2:
+        case GAME_PUZZLE3:
+            if (game.gotostate != GAME_LOST_PUZZLE && game.gotostate != GAME_WON)
+                gameSceneExit();
+            break;
+        case GAME_WON:
+        case GAME_LOST_CLASSIC:
+        case GAME_LOST_PUZZLE:
+            gameSceneExit();
             break;
         default:
             break;
@@ -472,10 +362,23 @@ void gameHandleGoTo()
         case GAME_MENU:
             gameMenuInit();
             break;
+        case GAME_SELECT:
+            if (game.state != GAME_MENU)
+            {
+                gameMenuInit();
+            }
+            gameSelectInit();
+            break;
         case GAME_CLASSIC:
             gameClassicInit();
             break;
-        case GAME_LOST:
+        case GAME_PUZZLE1:
+        case GAME_PUZZLE2:
+        case GAME_PUZZLE3:
+            gamePuzzleInit();
+            break;
+        case GAME_LOST_CLASSIC:
+        case GAME_LOST_PUZZLE:
             gameLoseInit();
             break;
         default:
@@ -484,30 +387,6 @@ void gameHandleGoTo()
     game.state = game.gotostate;
 }
 
-void appInit()
-{
-    verify(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) >= 0, "failed to init SDL", __LINE__);
-#ifdef __EMSCRIPTEN__
-    SDL_CreateWindowAndRenderer(window_width, window_height, 0, &app.window, &app.renderer);
-#endif
-#ifndef __EMSCRIPTEN__
-    SDL_CreateWindowAndRenderer(window_width, window_height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN, &app.window, &app.renderer);
-#endif
-
-    verify(app.window, "failed to create window", __LINE__);
-    verify(app.renderer, "failed to create renderer", __LINE__);
-
-    int imgFlags = IMG_INIT_PNG;
-    int imgSuccess = IMG_Init(imgFlags);
-    verify((imgSuccess & imgFlags), "failed to init png images", __LINE__);
-
-    SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
-
-    verify(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) >= 0, "failed to open audio", __LINE__);
-    Mix_AllocateChannels(MAX_MUSIC);
-
-    SDL_RenderSetLogicalSize(app.renderer, screen_width, screen_height);
-}
 void gameUpdateTime()
 {
     prev_time = current_time;
@@ -563,57 +442,57 @@ void drawSnake()
             case NORTH:
                 if (game.snake.next_move_direction == WEST)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadNorthWestAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadNorthWestAnim, __LINE__);
                 }
                 else if (game.snake.next_move_direction == EAST)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadNorthEastAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadNorthEastAnim, __LINE__);
                 }
                 else
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadNorthAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadNorthAnim, __LINE__);
                 }
                 break;
             case SOUTH:
                 if (game.snake.next_move_direction == WEST)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadSouthWestAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadSouthWestAnim, __LINE__);
                 }
                 else if (game.snake.next_move_direction == EAST)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadSouthEastAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadSouthEastAnim, __LINE__);
                 }
                 else
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadSouthAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadSouthAnim, __LINE__);
                 }
                 break;
             case WEST:
                 if (game.snake.next_move_direction == NORTH)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadWestNorthAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadWestNorthAnim, __LINE__);
                 }
                 else if (game.snake.next_move_direction == SOUTH)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadWestSouthAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadWestSouthAnim, __LINE__);
                 }
                 else
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadWestAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadWestAnim, __LINE__);
                 }
                 break;
             case EAST:
                 if (game.snake.next_move_direction == NORTH)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadEastNorthAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadEastNorthAnim, __LINE__);
                 }
                 else if (game.snake.next_move_direction == SOUTH)
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadEastSouthAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadEastSouthAnim, __LINE__);
                 }
                 else
                 {
-                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadEastAnim);
+                    imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakeHeadEastAnim, __LINE__);
                 }
                 break;
             default:
@@ -626,16 +505,16 @@ void drawSnake()
             switch(next_move_dir)
             {
             case NORTH:
-                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 3);
+                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 3, __LINE__);
                 break;
             case SOUTH:
-                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 1);
+                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 1, __LINE__);
                 break;
             case WEST:
-                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 5, 3);
+                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 5, 3, __LINE__);
                 break;
             case EAST:
-                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 4, 0);
+                imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 4, 0, __LINE__);
                 break;
             default:
                 break;
@@ -649,69 +528,69 @@ void drawSnake()
             case NORTH:
                 if (next_move_dir == WEST)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 1);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 1, __LINE__);
                 }
                 else if(next_move_dir == EAST)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 2);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 2, __LINE__);
                 }
                 else
                 {
                     if (i % 2 == 0)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 1);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 1, __LINE__);
                     if (i % 2 == 1)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 2);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 0, 2, __LINE__);
                 }
                 break;
             case SOUTH:
                 if (next_move_dir == WEST)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 1, 2);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 1, 2, __LINE__);
                 }
                 else if(next_move_dir == EAST)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 2, 2);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 2, 2, __LINE__);
                 }
                 else
                 {
                     if (i % 2 == 0)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 2);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 2, __LINE__);
                     if (i % 2 == 1)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 3);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 3, __LINE__);
                 }
                 break;
             case WEST:
                 if (next_move_dir == NORTH)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 2, 2);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 2, 2, __LINE__);
                 }
                 else if(next_move_dir == SOUTH)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 2);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 2, __LINE__);
                 }
                 else
                 {
                     if (i % 2 == 0)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 3);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 3, __LINE__);
                     if (i % 2 == 1)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 4, 3);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 4, 3, __LINE__);
                 }
                 break;
             case EAST:
                 if (next_move_dir == NORTH)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 1, 2);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 1, 2, __LINE__);
                 }
                 else if(next_move_dir == SOUTH)
                 {
-                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 1);
+                    imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 3, 1, __LINE__);
                 }
                 else
                 {
                     if (i % 2 == 0)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 5, 0);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 5, 0, __LINE__);
                     if (i % 2 == 1)
-                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 0);
+                        imageDraw(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, 6, 0, __LINE__);
                 }
                 break;
             default:
@@ -720,7 +599,7 @@ void drawSnake()
         }
     }
 }
-void updateFood()
+void updateClassicFood()
 {
     int i;
     int alleaten = 1;
@@ -746,7 +625,7 @@ void drawFood()
         if (game.foods[i].eaten)
             continue;
 
-        imageDraw(game.boardImg, game.foods[i].x, game.foods[i].y, 3, 2);
+        imageDraw(game.boardImg, game.foods[i].x, game.foods[i].y, 3, 2, __LINE__);
     }
 }
 void drawBoard()
@@ -757,7 +636,7 @@ void drawBoard()
     {
         for (x = game.board.left; x < game.board.right; ++x)
         {
-            imageDraw(game.boardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1]);
+            imageDraw(game.boardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
         }
     }
 }
@@ -771,7 +650,7 @@ void classicRules()
         game.snake.parts[0].y == game.board.top ||
         game.snake.parts[0].y == game.board.bottom - 1)
     {
-        gameGoTo(GAME_LOST);
+        gameGoTo(GAME_LOST_CLASSIC);
     }
 
     for (i = 1; i < game.snake.length; ++i)
@@ -779,7 +658,7 @@ void classicRules()
         if (game.snake.parts[0].x == game.snake.parts[i].x &&
             game.snake.parts[0].y == game.snake.parts[i].y)
         {
-            gameGoTo(GAME_LOST);
+            gameGoTo(GAME_LOST_CLASSIC);
         }
     }
 
@@ -806,9 +685,66 @@ void classicRules()
         moveSnake(getXNormalFromDirection(game.snake.next_move_direction), getYNormalFromDirection(game.snake.next_move_direction));
     }
 }
+void puzzleRules()
+{
+    int i;
+    switch(game.current_level)
+    {
+    case 0:
+        if (game.snake.length >= 4)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 1:
+        if (game.snake.length >= 6)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 2:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (game.snake.parts[0].x == game.board.left ||
+        game.snake.parts[0].x == game.board.right - 1 ||
+        game.snake.parts[0].y == game.board.top ||
+        game.snake.parts[0].y == game.board.bottom - 1)
+    {
+        gameGoTo(GAME_LOST_CLASSIC);
+    }
+
+    for (i = 1; i < game.snake.length; ++i)
+    {
+        if (game.snake.parts[0].x == game.snake.parts[i].x &&
+            game.snake.parts[0].y == game.snake.parts[i].y)
+        {
+            gameGoTo(GAME_LOST_CLASSIC);
+        }
+    }
+
+    for (i = 0; i < game.foodcount; ++i)
+    {
+        if (!game.foods[i].eaten &&
+            game.snake.parts[0].x == game.foods[i].x &&
+            game.snake.parts[0].y == game.foods[i].y)
+        {
+            game.foods[i].eaten = 1;
+            game.snake.parts[game.snake.length].x = game.snake.parts[game.snake.length - 1].x - getXNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
+            game.snake.parts[game.snake.length].y = game.snake.parts[game.snake.length - 1].y - getYNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
+            ++game.snake.length;
+        }
+    }
+}
 void menuRules()
 {
-    settleOperator(&game.menuCursor);
+    settleCursor(&game.menuCursor);
 
     if (game.menuCursor.x > 15)
         game.menuCursor.x = 15;
@@ -821,24 +757,46 @@ void menuRules()
 
     if (game.menuCursor.x > 1 && game.menuCursor.x < 8 && game.menuCursor.y >= 8 && game.menuCursor.y <= 10)
     {
-        alertOperator(&game.menuCursor);
+        alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
-            gameGoTo(GAME_PUZZLE);
+            gameGoTo(GAME_SELECT);
     }
     if (game.menuCursor.x > 9 && game.menuCursor.x < 15 && game.menuCursor.y >= 8 && game.menuCursor.y <= 10)
     {
-        alertOperator(&game.menuCursor);
+        alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
             gameGoTo(GAME_CLASSIC);
     }
     if (game.menuCursor.x > 11 && game.menuCursor.y > 14)
     {
-        alertOperator(&game.menuCursor);
+        alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
         {
-            disableOperator(&game.menuCursor);
+            disableCursor(&game.menuCursor);
             game.running = false;
         }
+    }
+}
+void selectRules()
+{
+    settleCursor(&game.menuCursor);
+    if (game.menuCursor.x > 1 && game.menuCursor.x < 5 && game.menuCursor.y > 1 && game.menuCursor.y < 5)
+    {
+        alertCursor(&game.menuCursor);
+        if (game.menuCursor.activated)
+            gameGoTo(GAME_PUZZLE1);
+    }
+    if (game.menuCursor.x > 6 && game.menuCursor.x < 10 && game.menuCursor.y > 1 && game.menuCursor.y < 5)
+    {
+        alertCursor(&game.menuCursor);
+        if (game.menuCursor.activated)
+            gameGoTo(GAME_PUZZLE2);
+    }
+    if (game.menuCursor.x > 11 && game.menuCursor.x < 15 && game.menuCursor.y > 1 && game.menuCursor.y < 5)
+    {
+        alertCursor(&game.menuCursor);
+        if (game.menuCursor.activated)
+            gameGoTo(GAME_PUZZLE3);
     }
 }
 void drawMenuCursor()
@@ -846,16 +804,36 @@ void drawMenuCursor()
     if (game.menuCursor.alert)
     {
         if (game.menuCursor.activated)
-            imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 17, 3);
+            imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 17, 3, __LINE__);
         if (!game.menuCursor.activated)
-            imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 16, 3);
+            imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 16, 3, __LINE__);
     }
     else if (game.menuCursor.disabled)
     {
-        imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorWaitAnim);
+        imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorWaitAnim, __LINE__);
     }
     else
-        imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorAnim);
+        imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorAnim, __LINE__);
+}
+void drawPuzzleObjective(char *textbuf)
+{
+    switch(game.current_level)
+    {
+        case 0:
+            sprintf(textbuf, "%s %i/%02i", "Length:", game.snake.length - 2, 2);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 1:
+            sprintf(textbuf, "%s %i/%02i", "Length:", game.snake.length - 2, 4);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 2:
+            sprintf(textbuf, "%s %i/%02i", "Length:", game.snake.length - 2, 8);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        default:
+            break;
+    }
 }
 
 void sdlEventLoop(SDL_Event *event)
@@ -886,7 +864,8 @@ void sdlEventLoop(SDL_Event *event)
                 break;
             case SDL_KEYUP:
                 anyKeyPressed--;
-                keystates[event->key.keysym.scancode] = KEY_RELEASED;
+                // keystates[event->key.keysym.scancode] = KEY_RELEASED;
+                keystates[event->key.keysym.scancode] = KEY_JUSTRELEASED;
                 break;
             default:
                 break;
@@ -905,11 +884,25 @@ void handleGeneralInput()
         game.running = false;
     }
 }
-void handleLostInput()
+void handleLostClassicInput()
 {
     if (getAnyKey() && !getKey(SDL_SCANCODE_ESCAPE) && game.snake.parts[game.snake.length - 1].destroyed)
     {
         gameGoTo(GAME_CLASSIC);
+    }
+}
+void handleLostPuzzleInput()
+{
+    if (getAnyKey() && !getKey(SDL_SCANCODE_ESCAPE) && game.snake.parts[game.snake.length - 1].destroyed)
+    {
+        gameGoTo(GAME_PUZZLE1 + game.current_level);
+    }
+}
+void handleWonInput()
+{
+    if (getAnyKey() && !getKey(SDL_SCANCODE_ESCAPE) && game.winAnim->frame == game.winAnim->framecount - 1)
+    {
+        gameGoTo(GAME_SELECT);
     }
 }
 void handleClassicInput()
@@ -931,38 +924,63 @@ void handleClassicInput()
         game.snake.next_move_direction = EAST;
     }
 }
+void handlePuzzleInput()
+{
+    if (getKey(SDL_SCANCODE_W) == KEY_TAPPED || getKey(SDL_SCANCODE_UP) == KEY_TAPPED)
+    {
+        game.snake.next_move_direction = NORTH;
+    }
+    if (getKey(SDL_SCANCODE_S) == KEY_TAPPED || getKey(SDL_SCANCODE_DOWN) == KEY_TAPPED)
+    {
+        game.snake.next_move_direction = SOUTH;
+    }
+    if (getKey(SDL_SCANCODE_A) == KEY_TAPPED || getKey(SDL_SCANCODE_LEFT) == KEY_TAPPED)
+    {
+        game.snake.next_move_direction = WEST;
+    }
+    if (getKey(SDL_SCANCODE_D) == KEY_TAPPED || getKey(SDL_SCANCODE_RIGHT) == KEY_TAPPED)
+    {
+        game.snake.next_move_direction = EAST;
+    }
+
+    if (getKey(SDL_SCANCODE_W) == KEY_JUSTRELEASED || getKey(SDL_SCANCODE_UP) == KEY_JUSTRELEASED)
+    {
+        moveSnake(0, -1);
+    }
+    if (getKey(SDL_SCANCODE_S) == KEY_JUSTRELEASED || getKey(SDL_SCANCODE_DOWN) == KEY_JUSTRELEASED)
+    {
+        moveSnake(0, 1);
+    }
+    if (getKey(SDL_SCANCODE_A) == KEY_JUSTRELEASED || getKey(SDL_SCANCODE_LEFT) == KEY_JUSTRELEASED)
+    {
+        moveSnake(-1, 0);
+    }
+    if (getKey(SDL_SCANCODE_D) == KEY_JUSTRELEASED || getKey(SDL_SCANCODE_RIGHT) == KEY_JUSTRELEASED)
+    {
+        moveSnake(1, 0);
+    }
+}
 void handleMenuInput()
 {
     if (getKey(SDL_SCANCODE_W) == KEY_TAPPED || getKey(SDL_SCANCODE_UP) == KEY_TAPPED)
     {
-        moveOperator(&game.menuCursor, 0, -1);
+        moveCursor(&game.menuCursor, 0, -1);
     }
     if (getKey(SDL_SCANCODE_S) == KEY_TAPPED || getKey(SDL_SCANCODE_DOWN) == KEY_TAPPED)
     {
-        moveOperator(&game.menuCursor, 0, 1);
+        moveCursor(&game.menuCursor, 0, 1);
     }
     if (getKey(SDL_SCANCODE_A) == KEY_TAPPED || getKey(SDL_SCANCODE_LEFT) == KEY_TAPPED)
     {
-        moveOperator(&game.menuCursor, -1, 0);
+        moveCursor(&game.menuCursor, -1, 0);
     }
     if (getKey(SDL_SCANCODE_D) == KEY_TAPPED || getKey(SDL_SCANCODE_RIGHT) == KEY_TAPPED)
     {
-        moveOperator(&game.menuCursor, 1, 0);
+        moveCursor(&game.menuCursor, 1, 0);
     }
     if (getKey(SDL_SCANCODE_SPACE) == KEY_TAPPED || getKey(SDL_SCANCODE_RETURN) == KEY_TAPPED || getKey(SDL_SCANCODE_Z) == KEY_TAPPED)
     {
-        activateOperator(&game.menuCursor);
-    }
-}
-void updateKeys()
-{
-    int i;
-    for (i = 0; i < SDL_NUM_SCANCODES; ++i)
-    {
-        if (keystates[i] == KEY_TAPPED)
-        {
-            keystates[i] = KEY_HELD;
-        }
+        activateCursor(&game.menuCursor);
     }
 }
 
@@ -979,14 +997,12 @@ void snakeExplode()
                 game.snake.parts[i].exploding = 0;
                 game.snakePartExplodeAnim->frame = 0;
             }
-            imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakePartExplodeAnim);
+            imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakePartExplodeAnim, __LINE__);
             break;
         }
     }
 }
 
-static int mouseX, mouseY;
-static SDL_Event event;
 void gameLoop()
 {
     SDL_RenderClear(app.renderer);
@@ -1000,12 +1016,12 @@ void gameLoop()
 
     gameHandleGoTo();
 
-    char scorebuf[128];
+    char textbuf[128];
 
     switch(game.state)
     {
     case GAME_MENU:
-        deactivateOperator(&game.menuCursor);
+        deactivateCursor(&game.menuCursor);
         handleMenuInput();
         while (!game_caught_up)
         {
@@ -1015,11 +1031,11 @@ void gameLoop()
             game_caught_up = gameCaughtUp();
         }
 
-        imageDrawLarge(game.menuImg, 0, 0, 0, 0, 16, 16);
-        imageDrawLarge(game.menuImg, 12, 14, 20, 0, 4, 2);
+        imageDrawLarge(game.menuImg, 0, 0, 0, 0, 16, 16, __LINE__);
+        imageDrawLarge(game.menuImg, 12, 14, 20, 0, 4, 2, __LINE__);
 
-        imageDrawLarge(game.menuImg, 2, 8, 24, 0, 5, 2);
-        imageDrawLarge(game.menuImg, 10, 8, 24, 2, 5, 2);
+        imageDrawLarge(game.menuImg, 2, 8, 24, 0, 5, 2, __LINE__);
+        imageDrawLarge(game.menuImg, 10, 8, 24, 2, 5, 2, __LINE__);
         drawMenuCursor();
         break;
     case GAME_CLASSIC:
@@ -1027,9 +1043,9 @@ void gameLoop()
         while (!game_caught_up)
         {
             classicRules();
-            updateFood();
-            musicFadeIn(game.lowMus);
-            musicFadeIn(game.highMus);
+            updateClassicFood();
+            musicFadeIn(game.lowMus, __LINE__);
+            musicFadeIn(game.highMus, __LINE__);
             animationPoolUpdateAll();
 
             game_caught_up = gameCaughtUp();
@@ -1038,14 +1054,47 @@ void gameLoop()
         drawBoard();
         drawFood();
         drawSnake();
-        sprintf(scorebuf, "%s%d", "Score: ", game.snake.length - 2);
-        imageDrawText(scorebuf, &game.font, 0, 0);
+        sprintf(textbuf, "%s%d", "Score: ", game.snake.length - 2);
+        imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
         break;
-    case GAME_LOST:
-        handleLostInput();
+    case GAME_SELECT:
+        deactivateCursor(&game.menuCursor);
+        handleMenuInput();
         while (!game_caught_up)
         {
-            musicFadeOut(game.lowMus);
+            selectRules();
+            animationPoolUpdateAll();
+
+            game_caught_up = gameCaughtUp();
+        }
+
+        imageDrawLarge(game.selectImg, 0, 0, 0, 0, 16, 16, __LINE__);
+        imageDrawLarge(game.selectImg, 2, 2, 16, 0, 2, 2, __LINE__);
+        drawMenuCursor();
+        break;
+    case GAME_PUZZLE1:
+    case GAME_PUZZLE2:
+    case GAME_PUZZLE3:
+        handlePuzzleInput();
+        while (!game_caught_up)
+        {
+            puzzleRules();
+            animationPoolUpdateAll();
+
+            game_caught_up = gameCaughtUp();
+        }
+
+        drawBoard();
+        drawFood();
+        drawSnake();
+        drawSnake();
+        drawPuzzleObjective(textbuf);
+        break;
+    case GAME_LOST_CLASSIC:
+        handleLostClassicInput();
+        while (!game_caught_up)
+        {
+            musicFadeOut(game.lowMus, __LINE__);
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
         }
@@ -1056,13 +1105,53 @@ void gameLoop()
         if (game.snake.parts[game.snake.length - 1].destroyed)
         {
             animationUnpause(game.loseAnim);
-            imageDrawLargeAnimated(game.loseTextImg, 0, 4, game.loseAnim, 16, 2);
+            imageDrawLargeAnimated(game.loseTextImg, 0, 4, game.loseAnim, 16, 2, __LINE__);
             if (game.loseAnim->frame == game.loseAnim->framecount - 1)
             {
-                imageDrawLarge(game.loseTextImg, 0, 6, 0, 30, 16, 2);
+                imageDrawLarge(game.loseTextImg, 0, 6, 0, 30, 16, 2, __LINE__);
             }
         }
-        imageDrawText(scorebuf, &game.font, game.loseAnim->frame / 3, (float)game.loseAnim->frame / 1.5f);
+        imageDrawText(textbuf, &game.font, game.loseAnim->frame / 3, (float)game.loseAnim->frame / 1.5f, __LINE__);
+        break;
+    case GAME_LOST_PUZZLE:
+        handleLostPuzzleInput();
+        while (!game_caught_up)
+        {
+            animationPoolUpdateAll();
+            game_caught_up = gameCaughtUp();
+        }
+        drawBoard();
+        drawFood();
+        snakeExplode();
+        drawSnake();
+        if (game.snake.parts[game.snake.length - 1].destroyed)
+        {
+            animationUnpause(game.loseAnim);
+            imageDrawLargeAnimated(game.loseTextImg, 0, 4, game.loseAnim, 16, 2, __LINE__);
+            if (game.loseAnim->frame == game.loseAnim->framecount - 1)
+            {
+                imageDrawLarge(game.loseTextImg, 0, 6, 0, 30, 16, 2, __LINE__);
+            }
+        }
+        imageDrawText(textbuf, &game.font, game.loseAnim->frame / 3, (float)game.loseAnim->frame / 1.5f, __LINE__);
+        break;
+    case GAME_WON:
+        handleWonInput();
+        while (!game_caught_up)
+        {
+            animationPoolUpdateAll();
+            game_caught_up = gameCaughtUp();
+        }
+        animationUnpause(game.winAnim);
+        drawBoard();
+        drawFood();
+        drawSnake();
+        imageDrawLargeAnimated(game.winTextImg, 0, 4, game.winAnim, 16, 2, __LINE__);
+        if (game.winAnim->frame == game.winAnim->framecount - 1)
+        {
+            imageDrawLarge(game.winTextImg, 0, 6, 0, 30, 16, 2, __LINE__);
+        }
+        imageDrawText(textbuf, &game.font, game.winAnim->frame / 3, (float)game.winAnim->frame * 1.5, __LINE__);
         break;
     default:
         // while (!game_caught_up)
@@ -1073,32 +1162,4 @@ void gameLoop()
     }
 
     SDL_RenderPresent(app.renderer);
-}
-
-int main(int argc, char **argv)
-{
-    srand(time(0));
-    appInit();
-
-    game.running = true;
-    game.state = GAME_WON;
-    gameGoTo(GAME_MENU);
-
-#ifndef __EMSCRIPTEN__
-    while (game.running)
-    {
-        gameLoop();
-    }
-    #endif
-#ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(gameLoop, 0, 1);
-#endif
-
-
-    SDL_DestroyWindow(app.window);
-    SDL_DestroyRenderer(app.renderer);
-    IMG_Quit();
-    SDL_Quit();
-    printf("goodbye!\n");
-    return 0;
 }

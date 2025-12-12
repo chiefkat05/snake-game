@@ -139,8 +139,10 @@ void animationReset(Animation *anim)
         anim->time = anim->timeframes[0];
 }
 
-void imageDrawAnimated(Image *img, int x, int y, Animation *anim)
+void imageDrawAnimated(Image *img, int x, int y, Animation *anim, int line)
 {
+    verify(anim, "animation doesn't exist", line);
+    verify(img, "image doesn't exist", line);
 
     SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
     img->clip_rect = (SDL_Rect){.x = anim->xframes[anim->frame] * IMG_PIXEL_SIZE,
@@ -148,8 +150,11 @@ void imageDrawAnimated(Image *img, int x, int y, Animation *anim)
                                 .w = IMG_PIXEL_SIZE, .h = IMG_PIXEL_SIZE};
     SDL_RenderCopy(app.renderer, img->img, &img->clip_rect, &scale_rect);
 }
-void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th)
+void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th, int line)
 {
+    verify(anim, "animation doesn't exist", line);
+    verify(img, "image doesn't exist", line);
+
     SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, tw * IMG_PIXEL_SIZE, th * IMG_PIXEL_SIZE};
     img->clip_rect = (SDL_Rect){.x = anim->xframes[anim->frame] * IMG_PIXEL_SIZE,
                                 .y = anim->yframes[anim->frame] * IMG_PIXEL_SIZE,

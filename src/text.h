@@ -23,6 +23,6 @@ void fontLoad(TextFont *font, const char *path, const char *alphabet);
 // rough change to a hashmap or something pls
 unsigned int getIndexFromChar(TextFont *font, char c);
 
-void imageDrawText(const char *str, TextFont *font, int x, int y);
+void imageDrawText(const char *str, TextFont *font, int x, int y, int line);
 
 #endif

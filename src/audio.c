@@ -27,8 +27,10 @@ Music *musicLoad(const char *path)
     loadMusicMixLoadWAV(mus, path);
     return mus;
 }
-void musicPlay(Music *mus)
+void musicPlay(Music *mus, int line)
 {
+    verify(mus, "music doesn't exist", line);
+
     Mix_PlayChannel(-1, mus->snd, -1);
     Mix_VolumeChunk(mus->snd, 0);
 }
@@ -37,8 +39,10 @@ void musicFree(Music *mus)
     mus->next = music_pool.free_music;
     music_pool.free_music = mus;
 }
-void musicFadeIn(Music *mus)
+void musicFadeIn(Music *mus, int line)
 {
+    verify(mus, "music doesn't exist", line);
+
     if (mus->fading)
     {
         if (mus->fade_time >= MIX_MAX_VOLUME)
@@ -55,8 +59,10 @@ void musicFadeIn(Music *mus)
     mus->fading = 1;
     mus->fade_time = Mix_VolumeChunk(mus->snd, -1);
 }
-void musicFadeOut(Music *mus)
+void musicFadeOut(Music *mus, int line)
 {
+    verify(mus, "music doesn't exist", line);
+
     if (mus->fading)
     {
         if (mus->fade_time <= 0.0)

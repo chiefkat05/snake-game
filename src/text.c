@@ -33,7 +33,7 @@ unsigned int getIndexFromChar(TextFont *font, char c)
     return 0;
 }
 
-void imageDrawText(const char *str, TextFont *font, int x, int y)
+void imageDrawText(const char *str, TextFont *font, int x, int y, int line)
 {
     unsigned int length = strlen(str);
 
@@ -42,7 +42,7 @@ void imageDrawText(const char *str, TextFont *font, int x, int y)
     for (i = 0; i < length; ++i)
     {
         unsigned int index = getIndexFromChar(font, str[i]);
-        imageDraw(font->img, x + xoffset, y, font->glyphs[index].tx, font->glyphs[index].ty);
+        imageDraw(font->img, x + xoffset, y, font->glyphs[index].tx, font->glyphs[index].ty, line);
         ++xoffset;
     }
 }

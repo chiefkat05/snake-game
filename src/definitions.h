@@ -14,9 +14,9 @@
 // #include <SDL2/SDL.h>
 // #include <SDL2/SDL_image.h>
 // #include <SDL2/SDL_mixer.h>
-#include "./sdlsrc/include/SDL2/SDL.h"
-#include "./sdlsrc/include/SDL2/SDL_image.h"
-#include "./sdlsrc/include/SDL2/SDL_mixer.h"
+#include "../sdlsrc/include/SDL2/SDL.h"
+#include "../sdlsrc/include/SDL2/SDL_image.h"
+#include "../sdlsrc/include/SDL2/SDL_mixer.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

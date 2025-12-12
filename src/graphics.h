@@ -28,8 +28,8 @@ SDL_Texture *loadSurfaceImage(const char *path, int *tile_count_x, int *tile_cou
 Image *imageAlloc();
 void imageLoadSurfaceImage(Image *img, const char *path);
 Image *imageLoad(const char *path);
-void imageDraw(Image *img, int x, int y, int tx, int ty);
-void imageDrawLarge(Image *img, int x, int y, int tx, int ty, int tw, int th);
+void imageDraw(Image *img, int x, int y, int tx, int ty, int line);
+void imageDrawLarge(Image *img, int x, int y, int tx, int ty, int tw, int th, int line);
 void imageFree(Image *img);
 
 void imagePoolFreeAll();

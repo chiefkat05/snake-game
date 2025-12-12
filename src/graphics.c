@@ -43,14 +43,18 @@ Image *imageLoad(const char *path)
     imageLoadSurfaceImage(img, path);
     return img;
 }
-void imageDraw(Image *img, int x, int y, int tx, int ty)
+void imageDraw(Image *img, int x, int y, int tx, int ty, int line)
 {
+    verify(img, "image doesn't exist", line);
+    
     SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
     img->clip_rect = (SDL_Rect){.x = tx * IMG_PIXEL_SIZE, .y = ty * IMG_PIXEL_SIZE, .w = IMG_PIXEL_SIZE, .h = IMG_PIXEL_SIZE};
     SDL_RenderCopy(app.renderer, img->img, &img->clip_rect, &scale_rect);
 }
-void imageDrawLarge(Image *img, int x, int y, int tx, int ty, int tw, int th)
+void imageDrawLarge(Image *img, int x, int y, int tx, int ty, int tw, int th, int line)
 {
+    verify(img, "image doesn't exist", line);
+    
     SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, tw * IMG_PIXEL_SIZE, th * IMG_PIXEL_SIZE};
     // SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, IMG_PIXEL_SIZE, IMG_PIXEL_SIZE};
     img->clip_rect = (SDL_Rect){.x = tx * IMG_PIXEL_SIZE, .y = ty * IMG_PIXEL_SIZE, .w = tw * IMG_PIXEL_SIZE, .h = th * IMG_PIXEL_SIZE};

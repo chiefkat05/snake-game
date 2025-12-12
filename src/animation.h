@@ -44,8 +44,8 @@ void animationPoolFreeAll();
 void animationPause(Animation *anim);
 void animationUnpause(Animation *anim);
 
-void imageDrawAnimated(Image *img, int x, int y, Animation *anim);
-void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th);
+void imageDrawAnimated(Image *img, int x, int y, Animation *anim, int line);
+void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th, int line);
 
 
 #endif
