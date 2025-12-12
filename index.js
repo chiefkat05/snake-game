@@ -27,7 +27,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmp_xp_hu3c.js
+// include: /tmp/tmpeh4kgw5e.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -157,25 +157,25 @@ Module['FS_createPath']("/", "snd", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/img/grassmap.png", "start": 0, "end": 436}, {"filename": "/img/img.png", "start": 436, "end": 98076}, {"filename": "/img/labmap.png", "start": 98076, "end": 98552}, {"filename": "/img/mainmenubg.aseprite", "start": 98552, "end": 98965}, {"filename": "/img/mainmenumap.aseprite", "start": 98965, "end": 100906}, {"filename": "/img/snakemap.png", "start": 100906, "end": 102035}, {"filename": "/img/uimap.png", "start": 102035, "end": 102554}, {"filename": "/snd/testsync.ogg", "start": 102554, "end": 264830}, {"filename": "/snd/testsync2.ogg", "start": 264830, "end": 427208}], "remote_package_size": 427208});
+    loadPackage({"files": [{"filename": "/img/grassmap.png", "start": 0, "end": 436}, {"filename": "/img/img.png", "start": 436, "end": 98076}, {"filename": "/img/labmap.png", "start": 98076, "end": 98552}, {"filename": "/img/losemap.aseprite", "start": 98552, "end": 99501}, {"filename": "/img/losemap.png", "start": 99501, "end": 100244}, {"filename": "/img/mainmenubg.aseprite", "start": 100244, "end": 100657}, {"filename": "/img/mainmenumap.aseprite", "start": 100657, "end": 102598}, {"filename": "/img/snakemap.png", "start": 102598, "end": 103727}, {"filename": "/img/uimap.png", "start": 103727, "end": 104246}, {"filename": "/snd/testsync.ogg", "start": 104246, "end": 266522}, {"filename": "/snd/testsync2.ogg", "start": 266522, "end": 428900}], "remote_package_size": 428900});
 
   })();
 
-// end include: /tmp/tmp_xp_hu3c.js
-// include: /tmp/tmpoqqnjpup.js
+// end include: /tmp/tmpeh4kgw5e.js
+// include: /tmp/tmpszmj3_e_.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: /tmp/tmpoqqnjpup.js
-// include: /tmp/tmp9q51cvh0.js
+  // end include: /tmp/tmpszmj3_e_.js
+// include: /tmp/tmp3ptvuw6q.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: /tmp/tmp9q51cvh0.js
+  // end include: /tmp/tmp3ptvuw6q.js
 
 
 var arguments_ = [];

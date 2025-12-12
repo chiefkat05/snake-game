@@ -42,6 +42,7 @@ void animationPoolUpdateAll();
 void animationPoolFreeAll();
 
 void imageDrawAnimated(Image *img, int x, int y, Animation *anim);
+void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th);
 
 
 #endif

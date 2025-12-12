@@ -106,6 +106,19 @@ void animationPoolUpdateAll()
 void animationPoolFreeAll()
 {
     // we do a little trolling
+    int i;
+    for (i = 0; i < MAX_ANIMATIONS; ++i)
+    {
+        anim_pool.animations[i] = (Animation){};
+    }
+
+    Animation *cursor = anim_pool.free_animations;
+    while (cursor)
+    {
+        anim_pool.animations[i] = (Animation){};
+        cursor = cursor->next;
+    }
+
     anim_pool.head = 0;
     anim_pool.free_animations = NULL;
 }
@@ -119,4 +132,11 @@ void imageDrawAnimated(Image *img, int x, int y, Animation *anim)
                                 .w = IMG_PIXEL_SIZE, .h = IMG_PIXEL_SIZE};
     SDL_RenderCopy(app.renderer, img->img, &img->clip_rect, &scale_rect);
 }
-// also imageDrawLargeAnimated when you make imageDrawLarge
+void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th)
+{
+    SDL_Rect scale_rect = {x * IMG_PIXEL_SIZE, y * IMG_PIXEL_SIZE, tw * IMG_PIXEL_SIZE, th * IMG_PIXEL_SIZE};
+    img->clip_rect = (SDL_Rect){.x = anim->xframes[anim->frame] * IMG_PIXEL_SIZE,
+                                .y = anim->yframes[anim->frame] * IMG_PIXEL_SIZE,
+                                .w = tw * IMG_PIXEL_SIZE, .h = th * IMG_PIXEL_SIZE};
+    SDL_RenderCopy(app.renderer, img->img, &img->clip_rect, &scale_rect);
+}

@@ -201,6 +201,9 @@ typedef struct
 
     Image *uiImg;
 
+    Image *loseText;
+    Animation *loseAnim;
+
     Music *lowMus;
     Music *highMus;
 } Game;
@@ -249,7 +252,71 @@ void makeBoard(int width, int height)
     game.board.top = (BOARD_HEIGHT - game.board.height) / 2;
     game.board.right = game.board.width + game.board.left;
     game.board.bottom = game.board.height + game.board.top;
-    
+}
+void setBoardGrass()
+{
+    int x, y;
+    for (y = game.board.top; y < game.board.bottom; ++y)
+    {
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
+            {
+                game.board.texture[x][y][0] = 3;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (x == game.board.left + 1 && y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (x == game.board.right - 2 && y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 2;
+            }
+            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 2;
+            }
+            else if (x == game.board.left + 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (x == game.board.right - 2)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 2;
+            }
+            else
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 1;
+                if (rand() % 12 == 0)
+                {
+                    game.board.texture[x][y][0] = 3;
+                    game.board.texture[x][y][1] = 0;
+                }
+            }
+        }
+    }
 }
 void spawnFood(int foodnum)
 {
@@ -280,9 +347,6 @@ void gameClassicInit()
     for (i = 0; i < game.snake.length; ++i)
     {
         game.snake.parts[i] = (SnakePart){};
-        game.snake.parts[i].destroyed = 0;
-        game.snake.parts[i].exploding = 0;
-        printf("%i / %i, %i\n", i, game.snake.length, game.snake.parts[i].destroyed);
     }
     game.snake = (Snake){};
     game.snake.length = 2;
@@ -290,7 +354,8 @@ void gameClassicInit()
     game.snake.next_move_direction = EAST;
     game.snake.move_timer = MOVE_TIMER_RESET;
     putSnake(BOARD_WIDTH / 2, BOARD_HEIGHT / 2);
-    makeBoard(10, 10);
+    makeBoard(16, 16);
+    setBoardGrass();
 
     game.snakeHeadNorthAnim = animationCreate();
     addFrame(0, 0, 8000);
@@ -343,21 +408,37 @@ void gameClassicInit()
     animationFinish(1);
 
     game.snakePartExplodeAnim = animationCreate();
-    addFrame(7, 2, 800);
-    addFrame(8, 2, 800);
-    addFrame(7, 3, 800);
-    addFrame(8, 3, 800);
+    addFrame(7, 2, 400);
+    addFrame(8, 2, 400);
+    addFrame(7, 3, 400);
+    addFrame(8, 3, 400);
     animationFinish(1);
 
-    printf("huh %d\n", game.snakeImg->width);
-
-    spawnFood(5);
+    spawnFood(16);
 }
 void gameClassicExit()
 {
     imagePoolFreeAll();
     musicPoolFreeAll();
     animationPoolFreeAll();
+}
+void gameLoseInit()
+{
+    game.loseText = imageLoad("./img/losemap.png");
+
+    game.loseAnim = animationCreate();
+    addFrame(0, 0, 1600);
+    addFrame(0, 2, 1600);
+    addFrame(0, 4, 1600);
+    addFrame(0, 6, 1600);
+    addFrame(0, 8, 1600);
+    addFrame(0, 10, 1600);
+    addFrame(0, 12, 1600);
+    addFrame(0, 14, 1600);
+    animationFinish(0);
+}
+void gameLoseExit()
+{
 }
 
 void gameGoTo(GameState state)
@@ -385,6 +466,9 @@ void gameHandleGoTo()
     {
         case GAME_CLASSIC:
             gameClassicInit();
+            break;
+        case GAME_LOST:
+            gameLoseInit();
             break;
         default:
             break;
@@ -668,46 +752,7 @@ void drawBoard()
     {
         for (x = game.board.left; x < game.board.right; ++x)
         {
-            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
-            {
-                imageDraw(game.boardImg, x, y, 3, 1);
-            }
-            else if (x == game.board.left + 1 && y == game.board.top + 1)
-            {
-                imageDraw(game.boardImg, x, y, 0, 0);
-            }
-            else if (x == game.board.right - 2 && y == game.board.top + 1)
-            {
-                imageDraw(game.boardImg, x, y, 2, 0);
-            }
-            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
-            {
-                imageDraw(game.boardImg, x, y, 0, 2);
-            }
-            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
-            {
-                imageDraw(game.boardImg, x, y, 2, 2);
-            }
-            else if (x == game.board.left + 1)
-            {
-                imageDraw(game.boardImg, x, y, 0, 1);
-            }
-            else if (x == game.board.right - 2)
-            {
-                imageDraw(game.boardImg, x, y, 2, 1);
-            }
-            else if (y == game.board.top + 1)
-            {
-                imageDraw(game.boardImg, x, y, 1, 0);
-            }
-            else if (y == game.board.bottom - 2)
-            {
-                imageDraw(game.boardImg, x, y, 1, 2);
-            }
-            else
-            {
-                imageDraw(game.boardImg, x, y, 1, 1);
-            }
+            imageDraw(game.boardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1]);
         }
     }
 }
@@ -802,7 +847,7 @@ void handleGeneralInput()
 }
 void handleLostInput()
 {
-    if (getAnyKey())
+    if (getAnyKey() && game.snake.parts[game.snake.length - 1].destroyed)
     {
         gameGoTo(GAME_CLASSIC);
     }
@@ -908,6 +953,11 @@ void gameLoop()
         drawFood();
         snakeExplode();
         drawSnake();
+        if (game.snake.parts[game.snake.length - 1].destroyed)
+        {
+            animationUpdate(game.loseAnim);
+            imageDrawLargeAnimated(game.loseText, 0, 4, game.loseAnim, 16, 2);
+        }
         break;
     default:
         break;

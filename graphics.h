@@ -29,6 +29,7 @@ Image *imageAlloc();
 void imageLoadSurfaceImage(Image *img, const char *path);
 Image *imageLoad(const char *path);
 void imageDraw(Image *img, int x, int y, int tx, int ty);
+void imageDrawLarge(Image *img, int x, int y, int tx, int ty, int tw, int th);
 void imageFree(Image *img);
 
 void imagePoolFreeAll();
