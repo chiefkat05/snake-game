@@ -3,6 +3,8 @@
 #include "audio.h"
 #include "application.h"
 #include "animation.h"
+#include "direction.h"
+#include "keystate.h"
 
 #define window_width 1280
 #define window_height 720
@@ -11,10 +13,6 @@
 
 // game plan
 
-// make a drawmulti function that can draw a larger texture clip rect (still locked to 16 pixel values)
-// make the ui map with the title screen and buttons
-// make a simple button thing that runs a function on press
-// make the lose screen map
 // make sure the game screens are working and operational, main menu screen -> classic mode screen -> lose screen (upload builds)
 // make puzzle mode button and add game screen with more hands-on board/food/snake positioning functions (only one level)
 // make a different logic loop and input loop for puzzle mode
@@ -28,102 +26,8 @@ Application app;
 ImagePool img_pool;
 MusicPool music_pool;
 AnimationPool anim_pool;
-
-typedef enum
-{
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST,
-    NORTHEAST,
-    SOUTHEAST,
-    NORTHWEST,
-    SOUTHWEST
-} Direction;
-Direction getMoveDirection(int xdelta, int ydelta)
-{
-    if (xdelta < 0 && ydelta == 0)
-        return WEST;
-    if (xdelta > 0 && ydelta == 0)
-        return EAST;
-    if (xdelta == 0 && ydelta < 0)
-        return NORTH;
-    if (xdelta == 0 && ydelta > 0)
-        return SOUTH;
-    if (xdelta > 0 && ydelta > 0)
-        return SOUTHEAST;
-    if (xdelta < 0 && ydelta > 0)
-        return SOUTHWEST;
-    if (xdelta > 0 && ydelta < 0)
-        return NORTHEAST;
-    if (xdelta < 0 && ydelta < 0)
-        return SOUTHWEST;
-
-    return 0; // won't get here
-}
-Direction getReverseDirection(Direction direction)
-{
-    switch (direction)
-    {
-        case WEST:
-            return EAST;
-        case EAST:
-            return WEST;
-        case NORTH:
-            return SOUTH;
-        case SOUTH:
-            return NORTH;
-        case NORTHWEST:
-            return SOUTHEAST;
-        case SOUTHEAST:
-            return NORTHWEST;
-        case NORTHEAST:
-            return SOUTHWEST;
-        case SOUTHWEST:
-            return NORTHEAST;
-        default:
-            return 0; // won't get here
-    }
-    return 0; // won't get here either
-}
-int getXNormalFromDirection(Direction direction)
-{
-    switch(direction)
-    {
-        case WEST:
-        case NORTHWEST:
-        case SOUTHWEST:
-            return -1;
-        case EAST:
-        case NORTHEAST:
-        case SOUTHEAST:
-            return 1;
-        case NORTH:
-        case SOUTH:
-        default:
-            return 0;
-    }
-    return 0;
-}
-int getYNormalFromDirection(Direction direction)
-{
-    switch(direction)
-    {
-        case NORTH:
-        case NORTHWEST:
-        case NORTHEAST:
-            return -1;
-        case SOUTH:
-        case SOUTHWEST:
-        case SOUTHEAST:
-            return 1;
-        case WEST:
-        case EAST:
-        default:
-            return 0;
-    }
-    return 0;
-}
+KeyState keystates[SDL_NUM_SCANCODES];
+int anyKeyPressed;
 
 #define MAX_FOODS 16
 typedef struct
@@ -147,6 +51,12 @@ typedef struct
     Direction next_move_direction;
     double move_timer;
 } Snake;
+
+typedef struct
+{
+    int x, y;
+    int activated;
+} Controller;
 
 #define BOARD_WIDTH 16
 #define BOARD_HEIGHT 16
@@ -199,36 +109,34 @@ typedef struct
 
     Animation *snakePartExplodeAnim;
 
-    Image *uiImg;
-
-    Image *loseText;
+    Image *loseTextImg;
     Animation *loseAnim;
+
+    Image *transitionImg;
+    Animation *transitionAnim;
+
+    Image *menuImg;
+    Animation *menuCursorAnim;
+    Animation *menuCursorWaitAnim;
+    Controller menuCursor;
 
     Music *lowMus;
     Music *highMus;
 } Game;
 static Game game;
 
-typedef enum
+void moveController(Controller *controller, int xdelta, int ydelta)
 {
-    KEY_RELEASED,
-    KEY_HELD,
-    KEY_TAPPED
-} KeyState;
-static KeyState keystates[SDL_NUM_SCANCODES];
-static int anyKeyPressed;
-
-KeyState getKey(SDL_Scancode key)
-{
-    return keystates[key];
+    controller->x += xdelta;
+    controller->y += ydelta;
 }
-int getAnyKey()
+void activateController(Controller *controller)
 {
-    if (anyKeyPressed > 0)
-    {
-        return 1;
-    }
-    return 0;
+    controller->activated = 1;
+}
+void deactivateController(Controller *controller)
+{
+    controller->activated = 0;
 }
 
 void putSnake(int x, int y)
@@ -330,11 +238,33 @@ void spawnFood(int foodnum)
     }
     game.foodcount = foodnum;
 }
+void gameMenuInit()
+{
+    game.menuImg = imageLoad("./img/mainmenumap.png");
+
+    game.menuCursorAnim = animationCreate();
+    addFrame(16, 2, 40000);
+    addFrame(17, 2, 4000);
+    addFrame(18, 2, 4000);
+    addFrame(19, 2, 4000);
+    addFrame(20, 2, 4000);
+    animationFinish(1);
+
+    game.menuCursorWaitAnim = animationCreate();
+    addFrame(16, 3, 4000);
+    addFrame(17, 3, 4000);
+    addFrame(18, 3, 4000);
+    addFrame(19, 3, 4000);
+    addFrame(20, 3, 4000);
+    animationFinish(1);
+
+    game.menuCursor.x = screen_width / (2 * IMG_PIXEL_SIZE);
+    game.menuCursor.y = screen_height / (2 * IMG_PIXEL_SIZE);
+}
 void gameClassicInit()
 {
     game.snakeImg = imageLoad("./img/snakemap.png");
     game.boardImg = imageLoad("./img/grassmap.png");
-    game.uiImg = imageLoad("./img/uimap.png");
 
     game.lowMus = musicLoad("./snd/testsync.ogg");
     game.highMus = musicLoad("./snd/testsync2.ogg");
@@ -424,21 +354,27 @@ void gameClassicExit()
 }
 void gameLoseInit()
 {
-    game.loseText = imageLoad("./img/losemap.png");
+    game.loseTextImg = imageLoad("./img/losemap.png");
 
     game.loseAnim = animationCreate();
-    addFrame(0, 0, 1600);
-    addFrame(0, 2, 1600);
-    addFrame(0, 4, 1600);
-    addFrame(0, 6, 1600);
-    addFrame(0, 8, 1600);
-    addFrame(0, 10, 1600);
-    addFrame(0, 12, 1600);
-    addFrame(0, 14, 1600);
+    addFrame(0, 0, 800);
+    addFrame(0, 2, 800);
+    addFrame(0, 4, 800);
+    addFrame(0, 6, 800);
+    addFrame(0, 8, 800);
+    addFrame(0, 10, 800);
+    addFrame(0, 12, 800);
+    addFrame(0, 14, 800);
+    addFrame(0, 16, 800);
+    addFrame(0, 18, 800);
+    addFrame(0, 20, 800);
+    addFrame(0, 22, 800);
+    addFrame(0, 24, 800);
+    addFrame(0, 26, 800);
+    addFrame(0, 28, 800);
     animationFinish(0);
-}
-void gameLoseExit()
-{
+
+    animationPause(game.loseAnim);
 }
 
 void gameGoTo(GameState state)
@@ -449,11 +385,15 @@ void gameHandleGoTo()
 {
     if (game.gotostate == game.state)
         return;
+        // do transition here too
 
     switch(game.state)
     {
+        case GAME_MENU:
+            break;
         case GAME_CLASSIC:
-            // gameClassicExit();
+            if (game.gotostate != GAME_LOST)
+                gameClassicExit();
             break;
         case GAME_LOST:
             gameClassicExit();
@@ -464,6 +404,9 @@ void gameHandleGoTo()
 
     switch(game.gotostate)
     {
+        case GAME_MENU:
+            gameMenuInit();
+            break;
         case GAME_CLASSIC:
             gameClassicInit();
             break;
@@ -499,9 +442,6 @@ void appInit()
     Mix_AllocateChannels(MAX_MUSIC);
 
     SDL_RenderSetLogicalSize(app.renderer, screen_width, screen_height);
-
-    game.running = true;
-    gameGoTo(GAME_CLASSIC);
 }
 void gameUpdateTime()
 {
@@ -801,6 +741,42 @@ void classicRules()
         moveSnake(getXNormalFromDirection(game.snake.next_move_direction), getYNormalFromDirection(game.snake.next_move_direction));
     }
 }
+void menuRules()
+{
+    if (game.menuCursor.x > 15)
+        game.menuCursor.x = 15;
+    if (game.menuCursor.x < 0)
+        game.menuCursor.x = 0;
+    if (game.menuCursor.y > 15)
+        game.menuCursor.y = 15;
+    if (game.menuCursor.y < 0)
+        game.menuCursor.y = 0;
+
+    if (game.menuCursor.x > 2 && game.menuCursor.x < 6 && game.menuCursor.y == 13 && game.menuCursor.activated)
+    {
+        gameGoTo(GAME_CLASSIC);
+    }
+    if (game.menuCursor.x > 9 && game.menuCursor.x < 14 && game.menuCursor.y == 13 && game.menuCursor.activated)
+    {
+        game.running = false;
+    }
+}
+void drawMenuCursor()
+{
+    // if (game.transitioning)
+    // {
+    //     imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorWaitAnim);
+    // }
+    if (game.menuCursor.x > 2 && game.menuCursor.x < 6 && game.menuCursor.y == 13 ||
+        game.menuCursor.x > 9 && game.menuCursor.x < 14 && game.menuCursor.y == 13)
+    {
+        imageDraw(game.menuImg, game.menuCursor.x, game.menuCursor.y, 16, 3);
+    }
+    else
+    {
+        imageDrawAnimated(game.menuImg, game.menuCursor.x, game.menuCursor.y, game.menuCursorAnim);
+    }
+}
 
 void sdlEventLoop(SDL_Event *event)
 {
@@ -840,7 +816,11 @@ void sdlEventLoop(SDL_Event *event)
 }
 void handleGeneralInput()
 {
-    if (getKey(SDL_SCANCODE_ESCAPE) == KEY_TAPPED || getKey(SDL_SCANCODE_F4) == KEY_TAPPED)
+    if (getKey(SDL_SCANCODE_ESCAPE) == KEY_TAPPED)
+    {
+        gameGoTo(GAME_MENU);
+    }
+    if (getKey(SDL_SCANCODE_F4) == KEY_TAPPED)
     {
         game.running = false;
     }
@@ -869,6 +849,29 @@ void handleClassicInput()
     if (getKey(SDL_SCANCODE_D) == KEY_TAPPED || getKey(SDL_SCANCODE_RIGHT) == KEY_TAPPED)
     {
         game.snake.next_move_direction = EAST;
+    }
+}
+void handleMenuInput()
+{
+    if (getKey(SDL_SCANCODE_W) == KEY_TAPPED || getKey(SDL_SCANCODE_UP) == KEY_TAPPED)
+    {
+        moveController(&game.menuCursor, 0, -1);
+    }
+    if (getKey(SDL_SCANCODE_S) == KEY_TAPPED || getKey(SDL_SCANCODE_DOWN) == KEY_TAPPED)
+    {
+        moveController(&game.menuCursor, 0, 1);
+    }
+    if (getKey(SDL_SCANCODE_A) == KEY_TAPPED || getKey(SDL_SCANCODE_LEFT) == KEY_TAPPED)
+    {
+        moveController(&game.menuCursor, -1, 0);
+    }
+    if (getKey(SDL_SCANCODE_D) == KEY_TAPPED || getKey(SDL_SCANCODE_RIGHT) == KEY_TAPPED)
+    {
+        moveController(&game.menuCursor, 1, 0);
+    }
+    if (getKey(SDL_SCANCODE_SPACE) == KEY_TAPPED || getKey(SDL_SCANCODE_RETURN) == KEY_TAPPED || getKey(SDL_SCANCODE_Z) == KEY_TAPPED)
+    {
+        activateController(&game.menuCursor);
     }
 }
 void updateKeys()
@@ -920,7 +923,20 @@ void gameLoop()
     switch(game.state)
     {
     case GAME_MENU:
-        // menu here
+        deactivateController(&game.menuCursor);
+        handleMenuInput();
+        while (!game_caught_up)
+        {
+            menuRules();
+            animationPoolUpdateAll();
+
+            game_caught_up = gameCaughtUp();
+        }
+
+        imageDrawLarge(game.menuImg, 0, 0, 0, 0, 16, 16);
+        imageDrawLarge(game.menuImg, 2, 12, 16, 0, 4, 2);
+        imageDrawLarge(game.menuImg, 10, 12, 20, 0, 4, 2);
+        drawMenuCursor();
         break;
     case GAME_CLASSIC:
         handleClassicInput();
@@ -938,9 +954,7 @@ void gameLoop()
         drawBoard();
         drawFood();
         drawSnake();
-
-        SDL_GetMouseState(&mouseX, &mouseY);
-    break;
+        break;
     case GAME_LOST:
         handleLostInput();
         while (!game_caught_up)
@@ -955,8 +969,12 @@ void gameLoop()
         drawSnake();
         if (game.snake.parts[game.snake.length - 1].destroyed)
         {
-            animationUpdate(game.loseAnim);
-            imageDrawLargeAnimated(game.loseText, 0, 4, game.loseAnim, 16, 2);
+            animationUnpause(game.loseAnim);
+            imageDrawLargeAnimated(game.loseTextImg, 0, 4, game.loseAnim, 16, 2);
+            if (game.loseAnim->frame == game.loseAnim->framecount - 1)
+            {
+                imageDrawLarge(game.loseTextImg, 0, 6, 0, 30, 16, 2);
+            }
         }
         break;
     default:
@@ -970,6 +988,10 @@ int main(int argc, char **argv)
 {
     srand(time(0));
     appInit();
+
+    game.running = true;
+    game.state = GAME_WON;
+    gameGoTo(GAME_MENU);
 
 #ifndef __EMSCRIPTEN__
     while (game.running)

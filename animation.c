@@ -61,7 +61,7 @@ void animationFinish(uint8 args)
 }
 void animationUpdate(Animation *anim)
 {
-    if (anim->framecount <= 0)
+    if (anim->framecount <= 0 || anim->paused)
         return;
 
     anim->time -= tick_speed;
@@ -121,6 +121,21 @@ void animationPoolFreeAll()
 
     anim_pool.head = 0;
     anim_pool.free_animations = NULL;
+}
+
+void animationPause(Animation *anim)
+{
+    anim->paused = 1;
+}
+void animationUnpause(Animation *anim)
+{
+    anim->paused = 0;
+}
+void animationReset(Animation *anim)
+{
+    anim->frame = 0;
+    if (anim->framecount > 0)
+        anim->time = anim->timeframes[0];
 }
 
 void imageDrawAnimated(Image *img, int x, int y, Animation *anim)

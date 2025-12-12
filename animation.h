@@ -13,6 +13,7 @@ typedef struct _Animation
     
     int time;
     unsigned int frame;
+    int paused;
 
     uint8 args;
 
@@ -40,6 +41,8 @@ void animationUpdate(Animation *anim);
 
 void animationPoolUpdateAll();
 void animationPoolFreeAll();
+void animationPause(Animation *anim);
+void animationUnpause(Animation *anim);
 
 void imageDrawAnimated(Image *img, int x, int y, Animation *anim);
 void imageDrawLargeAnimated(Image *img, int x, int y, Animation *anim, int tw, int th);
