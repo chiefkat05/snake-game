@@ -96,6 +96,136 @@ void setBoardGrass()
         }
     }
 }
+void setBoardSandbox()
+{
+    int x, y;
+    for (y = game.board.top; y < game.board.bottom; ++y)
+    {
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
+            {
+                game.board.texture[x][y][0] = 3;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (x == game.board.left + 1 && y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (x == game.board.right - 2 && y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 2;
+            }
+            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 2;
+            }
+            else if (x == game.board.left + 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (x == game.board.right - 2)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 2;
+            }
+            else
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 1;
+                if (rand() % 12 == 0)
+                {
+                    game.board.texture[x][y][0] = 3;
+                    game.board.texture[x][y][1] = 0;
+                }
+            }
+        }
+    }
+}
+void setBoardVolcano()
+{
+    int x, y;
+    for (y = game.board.top; y < game.board.bottom; ++y)
+    {
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
+            {
+                game.board.texture[x][y][0] = 3;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (x == game.board.left + 1 && y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (x == game.board.right - 2 && y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 2;
+            }
+            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 2;
+            }
+            else if (x == game.board.left + 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (x == game.board.right - 2)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 1;
+            }
+            else if (y == game.board.top + 1)
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 0;
+            }
+            else if (y == game.board.bottom - 2)
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 2;
+            }
+            else
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 1;
+                if (rand() % 12 == 0)
+                {
+                    game.board.texture[x][y][0] = 3;
+                    game.board.texture[x][y][1] = 0;
+                }
+            }
+        }
+    }
+}
 void spawnFood(int foodnum)
 {
     int i;
@@ -153,7 +283,7 @@ void gameSelectInit()
 void baseGameInit()
 {
     game.snakeImg = imageLoad("./img/snakemap.png");
-    game.boardImg = imageLoad("./img/grassmap.png");
+    game.grassBoardImg = imageLoad("./img/grassmap.png");
 
     game.lowMus = musicLoad("./snd/testsync.ogg");
     game.highMus = musicLoad("./snd/testsync2.ogg");
@@ -265,11 +395,13 @@ void gamePuzzleInit()
     {
         case 0:
             makeBoard(5, 5);
+            setBoardGrass();
             putFood(1, 2);
             putFood(2, 3);
             break;
         case 1:
             makeBoard(6, 6);
+            setBoardGrass();
             putFood(2, 2);
             putFood(3, 2);
             putFood(2, 4);
@@ -277,6 +409,118 @@ void gamePuzzleInit()
             break;
         case 2:
             makeBoard(6, 8);
+            setBoardGrass();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 3:
+            makeBoard(6, 8);
+            setBoardGrass();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+
+
+        case 4:
+            makeBoard(6, 8);
+            setBoardSandbox();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 5:
+            makeBoard(6, 8);
+            setBoardSandbox();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 6:
+            makeBoard(6, 8);
+            setBoardSandbox();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 7:
+            makeBoard(6, 8);
+            setBoardSandbox();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+
+        case 8:
+            makeBoard(6, 8);
+            setBoardVolcano();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 9:
+            makeBoard(6, 8);
+            setBoardVolcano();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 10:
+            makeBoard(6, 8);
+            setBoardVolcano();
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            putFood(2, 2);
+            break;
+        case 11:
+            makeBoard(6, 8);
+            setBoardVolcano();
             putFood(2, 2);
             putFood(2, 2);
             putFood(2, 2);
@@ -289,7 +533,6 @@ void gamePuzzleInit()
         default:
             break;
     }
-    setBoardGrass();
 }
 void gameSceneExit()
 {
@@ -325,7 +568,7 @@ void gameLoseInit()
 void gameGoTo(GameState state)
 {
     game.gotostate = state;
-    if (game.gotostate >= GAME_PUZZLE1 && game.gotostate <= GAME_PUZZLE3)
+    if (game.gotostate >= GAME_PUZZLE1 && game.gotostate <= GAME_PUZZLE12)
     {
         game.current_level = game.gotostate - GAME_PUZZLE1;
     }
@@ -352,6 +595,15 @@ void gameHandleGoTo()
         case GAME_PUZZLE1:
         case GAME_PUZZLE2:
         case GAME_PUZZLE3:
+        case GAME_PUZZLE4:
+        case GAME_PUZZLE5:
+        case GAME_PUZZLE6:
+        case GAME_PUZZLE7:
+        case GAME_PUZZLE8:
+        case GAME_PUZZLE9:
+        case GAME_PUZZLE10:
+        case GAME_PUZZLE11:
+        case GAME_PUZZLE12:
             if (game.gotostate != GAME_LOST_PUZZLE && game.gotostate != GAME_WON)
                 gameSceneExit();
             break;
@@ -382,6 +634,15 @@ void gameHandleGoTo()
         case GAME_PUZZLE1:
         case GAME_PUZZLE2:
         case GAME_PUZZLE3:
+        case GAME_PUZZLE4:
+        case GAME_PUZZLE5:
+        case GAME_PUZZLE6:
+        case GAME_PUZZLE7:
+        case GAME_PUZZLE8:
+        case GAME_PUZZLE9:
+        case GAME_PUZZLE10:
+        case GAME_PUZZLE11:
+        case GAME_PUZZLE12:
             gamePuzzleInit();
             break;
         case GAME_LOST_CLASSIC:
@@ -632,7 +893,7 @@ void drawFood()
         if (game.foods[i].eaten)
             continue;
 
-        imageDraw(game.boardImg, game.foods[i].x, game.foods[i].y, 3, 2, __LINE__);
+        imageDraw(game.grassBoardImg, game.foods[i].x, game.foods[i].y, 3, 2, __LINE__);
     }
 }
 void drawBoard()
@@ -643,7 +904,7 @@ void drawBoard()
     {
         for (x = game.board.left; x < game.board.right; ++x)
         {
-            imageDraw(game.boardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
+            imageDraw(game.grassBoardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
         }
     }
 }
@@ -710,6 +971,61 @@ void puzzleRules()
         }
         break;
     case 2:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 3:
+        if (game.snake.length >= 10)
+        {
+            printf("hello???????????????????????????\n");
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 4:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 5:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 6:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 7:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 8:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 9:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 10:
+        if (game.snake.length >= 10)
+        {
+            gameGoTo(GAME_WON);
+        }
+        break;
+    case 11:
         if (game.snake.length >= 10)
         {
             gameGoTo(GAME_WON);
@@ -797,23 +1113,118 @@ void selectRules()
     if (game.menuCursor.y < 0)
         game.menuCursor.y = 0;
 
+    // grass
     if (game.menuCursor.x > 1 && game.menuCursor.x < 4 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
     {
-        alertCursor(&game.menuCursor);
-        if (game.menuCursor.activated)
-            gameGoTo(GAME_PUZZLE1);
+        if (game.unlocked_levelcount > 0)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE1);
+        }
     }
     if (game.menuCursor.x > 4 && game.menuCursor.x < 7 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
     {
-        alertCursor(&game.menuCursor);
-        if (game.menuCursor.activated)
-            gameGoTo(GAME_PUZZLE2);
+        if (game.unlocked_levelcount > 1)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE2);
+        }
     }
     if (game.menuCursor.x > 8 && game.menuCursor.x < 11 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
     {
-        alertCursor(&game.menuCursor);
-        if (game.menuCursor.activated)
-            gameGoTo(GAME_PUZZLE3);
+        if (game.unlocked_levelcount > 2)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE3);
+        }
+    }
+    if (game.menuCursor.x > 11 && game.menuCursor.x < 14 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
+    {
+        if (game.unlocked_levelcount > 3)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE4);
+        }
+    }
+
+    // sandbox
+    if (game.menuCursor.x > 1 && game.menuCursor.x < 4 && game.menuCursor.y > 8 && game.menuCursor.y < 11)
+    {
+        if (game.unlocked_levelcount > 4)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE5);
+        }
+    }
+    if (game.menuCursor.x > 4 && game.menuCursor.x < 7 && game.menuCursor.y > 8 && game.menuCursor.y < 11)
+    {
+        if (game.unlocked_levelcount > 5)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE6);
+        }
+    }
+    if (game.menuCursor.x > 8 && game.menuCursor.x < 11 && game.menuCursor.y > 8 && game.menuCursor.y < 11)
+    {
+        if (game.unlocked_levelcount > 6)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE7);
+        }
+    }
+    if (game.menuCursor.x > 11 && game.menuCursor.x < 14 && game.menuCursor.y > 8 && game.menuCursor.y < 11)
+    {
+        if (game.unlocked_levelcount > 7)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE8);
+        }
+    }
+
+    // volcano
+    if (game.menuCursor.x > 1 && game.menuCursor.x < 4 && game.menuCursor.y > 11 && game.menuCursor.y < 14)
+    {
+        if (game.unlocked_levelcount > 8)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE9);
+        }
+    }
+    if (game.menuCursor.x > 4 && game.menuCursor.x < 7 && game.menuCursor.y > 11 && game.menuCursor.y < 14)
+    {
+        if (game.unlocked_levelcount > 9)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE10);
+        }
+    }
+    if (game.menuCursor.x > 8 && game.menuCursor.x < 11 && game.menuCursor.y > 11 && game.menuCursor.y < 14)
+    {
+        if (game.unlocked_levelcount > 10)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE11);
+        }
+    }
+    if (game.menuCursor.x > 11 && game.menuCursor.x < 14 && game.menuCursor.y > 11 && game.menuCursor.y < 14)
+    {
+        if (game.unlocked_levelcount > 11)
+        {
+            alertCursor(&game.menuCursor);
+            if (game.menuCursor.activated)
+                gameGoTo(GAME_PUZZLE12);
+        }
     }
 }
 void drawMenuCursor()
@@ -1020,6 +1431,173 @@ void snakeExplode()
     }
 }
 
+void drawLevelIcons()
+{
+    // grass
+    if (game.unlocked_levelcount < 1)
+    {
+        imageDrawLarge(game.selectImg, 2, 6, 16, 0, 2, 2, __LINE__);
+    }
+    else if (game.unlocked_levelcount == 1)
+    {
+        imageDrawLarge(game.selectImg, 2, 6, 20, 4, 2, 2, __LINE__);
+    }
+    else
+    {
+        imageDrawLarge(game.selectImg, 2, 6, 22, 4, 2, 2, __LINE__);
+    }
+    if (game.unlocked_levelcount < 2)
+    {
+        imageDrawLarge(game.selectImg, 5, 6, 16, 0, 2, 2, __LINE__);
+    }
+    else if (game.unlocked_levelcount == 2)
+    {
+        imageDrawLarge(game.selectImg, 5, 6, 28, 4, 2, 2, __LINE__);
+    }
+    else
+    {
+        imageDrawLarge(game.selectImg, 5, 6, 30, 4, 2, 2, __LINE__);
+    }
+    if (game.unlocked_levelcount < 3)
+    {
+        imageDrawLarge(game.selectImg, 9, 6, 16, 0, 2, 2, __LINE__);
+    }
+    else if (game.unlocked_levelcount == 3)
+    {
+        imageDrawLarge(game.selectImg, 9, 6, 20, 6, 2, 2, __LINE__);
+    }
+    else
+    {
+        imageDrawLarge(game.selectImg, 9, 6, 22, 6, 2, 2, __LINE__);
+    }
+    if (game.unlocked_levelcount < 4)
+    {
+        imageDrawLarge(game.selectImg, 12, 6, 16, 0, 2, 2, __LINE__);
+    }
+    else if (game.unlocked_levelcount == 4)
+    {
+        imageDrawLarge(game.selectImg, 12, 6, 28, 6, 2, 2, __LINE__);
+    }
+    else
+    {
+        imageDrawLarge(game.selectImg, 12, 6, 30, 6, 2, 2, __LINE__);
+    }
+
+    // sandbox
+    if (game.unlocked_levelcount > 4)
+    {
+        if (game.unlocked_levelcount < 5)
+        {
+            imageDrawLarge(game.selectImg, 2, 9, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 5)
+        {
+            imageDrawLarge(game.selectImg, 2, 9, 20, 8, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 2, 9, 22, 8, 2, 2, __LINE__);
+        }
+        if (game.unlocked_levelcount < 6)
+        {
+            imageDrawLarge(game.selectImg, 5, 9, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 6)
+        {
+            imageDrawLarge(game.selectImg, 5, 9, 28, 8, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 5, 9, 30, 8, 2, 2, __LINE__);
+        }
+        if (game.unlocked_levelcount < 7)
+        {
+            imageDrawLarge(game.selectImg, 9, 9, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 7)
+        {
+            imageDrawLarge(game.selectImg, 9, 9, 20, 6, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 9, 9, 22, 6, 2, 2, __LINE__);
+        }
+        if (game.unlocked_levelcount < 8)
+        {
+            imageDrawLarge(game.selectImg, 12, 9, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 8)
+        {
+            imageDrawLarge(game.selectImg, 12, 9, 28, 6, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 12, 9, 30, 6, 2, 2, __LINE__);
+        }
+    }
+    // imageDrawLarge(game.selectImg, 2, 9, 16, 0, 2, 2, __LINE__);
+    // imageDrawLarge(game.selectImg, 5, 9, 16, 0, 2, 2, __LINE__);
+    // imageDrawLarge(game.selectImg, 9, 9, 16, 0, 2, 2, __LINE__);
+    // imageDrawLarge(game.selectImg, 12, 9, 16, 0, 2, 2, __LINE__);
+    // volcano
+    if (game.unlocked_levelcount > 8)
+    {
+        if (game.unlocked_levelcount < 9)
+        {
+            imageDrawLarge(game.selectImg, 2, 12, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 9)
+        {
+            imageDrawLarge(game.selectImg, 2, 12, 20, 4, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 2, 12, 22, 4, 2, 2, __LINE__);
+        }
+        if (game.unlocked_levelcount < 10)
+        {
+            imageDrawLarge(game.selectImg, 5, 12, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 10)
+        {
+            imageDrawLarge(game.selectImg, 5, 12, 28, 4, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 5, 12, 30, 4, 2, 2, __LINE__);
+        }
+        if (game.unlocked_levelcount < 11)
+        {
+            imageDrawLarge(game.selectImg, 9, 12, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 11)
+        {
+            imageDrawLarge(game.selectImg, 9, 12, 20, 6, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 9, 12, 22, 6, 2, 2, __LINE__);
+        }
+        if (game.unlocked_levelcount < 12)
+        {
+            imageDrawLarge(game.selectImg, 12, 12, 16, 0, 2, 2, __LINE__);
+        }
+        else if (game.unlocked_levelcount == 12)
+        {
+            imageDrawLarge(game.selectImg, 12, 12, 28, 6, 2, 2, __LINE__);
+        }
+        else
+        {
+            imageDrawLarge(game.selectImg, 12, 12, 30, 6, 2, 2, __LINE__);
+        }
+    }
+    // imageDrawLarge(game.selectImg, 2, 12, 16, 0, 2, 2, __LINE__);
+    // imageDrawLarge(game.selectImg, 5, 12, 16, 0, 2, 2, __LINE__);
+    // imageDrawLarge(game.selectImg, 9, 12, 16, 0, 2, 2, __LINE__);
+    // imageDrawLarge(game.selectImg, 12, 12, 16, 0, 2, 2, __LINE__);
+    imageDrawLarge(game.selectImg, 1, 2, 16, 2, 14, 2, __LINE__);
+}
+
 void gameLoop()
 {
     SDL_RenderClear(app.renderer);
@@ -1089,27 +1667,22 @@ void gameLoop()
         imageDrawLargeAnimated(game.selectImg, 8, 0, game.selectBGAnim, 8, 8, __LINE__);
         imageDrawLargeAnimated(game.selectImg, 0, 8, game.selectBGAnim, 8, 8, __LINE__);
         imageDrawLargeAnimated(game.selectImg, 8, 8, game.selectBGAnim, 8, 8, __LINE__);
-        // grass
-        imageDrawLarge(game.selectImg, 2, 6, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 5, 6, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 9, 6, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 12, 6, 16, 0, 2, 2, __LINE__);
-        // sandbox
-        imageDrawLarge(game.selectImg, 2, 9, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 5, 9, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 9, 9, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 12, 9, 16, 0, 2, 2, __LINE__);
-        // volcano
-        imageDrawLarge(game.selectImg, 2, 12, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 5, 12, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 9, 12, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 12, 12, 16, 0, 2, 2, __LINE__);
-        imageDrawLarge(game.selectImg, 1, 2, 16, 2, 14, 2, __LINE__);
+
+        drawLevelIcons();
         drawMenuCursor();
         break;
     case GAME_PUZZLE1:
     case GAME_PUZZLE2:
     case GAME_PUZZLE3:
+    case GAME_PUZZLE4:
+    case GAME_PUZZLE5:
+    case GAME_PUZZLE6:
+    case GAME_PUZZLE7:
+    case GAME_PUZZLE8:
+    case GAME_PUZZLE9:
+    case GAME_PUZZLE10:
+    case GAME_PUZZLE11:
+    case GAME_PUZZLE12:
         handlePuzzleInput();
         while (!game_caught_up)
         {
@@ -1124,6 +1697,7 @@ void gameLoop()
         drawSnake();
         drawSnake();
         drawPuzzleObjective(textbuf);
+        // printf("huh %i %i %i\n", game.state, game.current_level, game.unlocked_levelcount);
         break;
     case GAME_LOST_CLASSIC:
         handleLostClassicInput();
@@ -1176,6 +1750,11 @@ void gameLoop()
         {
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
+        }
+
+        if (game.current_level == game.unlocked_levelcount - 1)
+        {
+            game.unlocked_levelcount++;
         }
         animationUnpause(game.winAnim);
         drawBoard();

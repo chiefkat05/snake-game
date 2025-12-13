@@ -72,6 +72,15 @@ typedef enum
     GAME_PUZZLE1,
     GAME_PUZZLE2,
     GAME_PUZZLE3,
+    GAME_PUZZLE4,
+    GAME_PUZZLE5,
+    GAME_PUZZLE6,
+    GAME_PUZZLE7,
+    GAME_PUZZLE8,
+    GAME_PUZZLE9,
+    GAME_PUZZLE10,
+    GAME_PUZZLE11,
+    GAME_PUZZLE12,
     GAME_SETTINGS,
     GAME_CLASSIC,
     GAME_LOST_CLASSIC,
@@ -93,7 +102,10 @@ typedef struct
 
     TextFont font;
 
-    Image *boardImg;
+    Image *grassBoardImg;
+    Image *sandBoardImg;
+    Image *volcanoBoardImg;
+
     Image *snakeImg;
     Animation *snakeHeadNorthAnim;
     Animation *snakeHeadSouthAnim;
@@ -115,9 +127,6 @@ typedef struct
     Animation *loseAnim;
     Image *winTextImg;
     Animation *winAnim;
-
-    // Image *transitionImg;
-    // Animation *transitionAnim;
 
     Image *menuImg;
     Animation *menuCursorAnim;
