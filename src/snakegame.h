@@ -15,22 +15,12 @@
 
 // game plan
 
-// no details plan:
-    // unlock system
-    // lose screen bug puzzle
-    // makeboard for puzzles 1-3
-
-// lose screen for puzzle is broken
-// add three level selection images, and draw them based on how many levels are unlocked
-// change selectRules to allow clicking on any unlocked level images (the unlocked part is not done)
-// make food move over or down if it's on top of another food
-// rename setboardgrass to setboardclassicgrass and make three more identical makeboard functions for makeboardpuzzle1-3
-// add set obstacles to lvl1-3 boards
 // add rules in lvl1-3 rules to treat the set obstacles like walls
 
 // transition
 // make transition animation and make sure it looks right by playing it at the start of one of the scenes
 // idk go from there
+// transition is bonus if you really really have time but you won't so don't bother
 
 #define MAX_FOODS 16
 typedef struct
@@ -60,6 +50,7 @@ typedef struct
 typedef struct
 {
     int texture[BOARD_WIDTH][BOARD_HEIGHT][2];
+    int wall[BOARD_WIDTH][BOARD_HEIGHT];
     int width, height;
 
     int left, right, top, bottom;
@@ -88,6 +79,13 @@ typedef enum
     GAME_WON
 } GameState;
 
+typedef enum
+{
+    BOARD_GRASS,
+    BOARD_SANDBOX,
+    BOARD_VOLCANO
+} BoardType;
+
 typedef struct
 {
     int running, transitioning;
@@ -105,6 +103,8 @@ typedef struct
     Image *grassBoardImg;
     Image *sandBoardImg;
     Image *volcanoBoardImg;
+    Animation *volcanoWallAnim;
+    Animation *volcanoWall2Anim;
 
     Image *snakeImg;
     Animation *snakeHeadNorthAnim;

@@ -31,17 +31,21 @@ void makeBoard(int width, int height)
     game.board.right = game.board.width + game.board.left;
     game.board.bottom = game.board.height + game.board.top;
 }
-void setBoardGrass()
+void setBoard(BoardType type)
 {
     int x, y;
+    if (type == BOARD_GRASS)
+    {
     for (y = game.board.top; y < game.board.bottom; ++y)
     {
         for (x = game.board.left; x < game.board.right; ++x)
         {
+            game.board.wall[x][y] = 0;
             if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
             {
                 game.board.texture[x][y][0] = 3;
                 game.board.texture[x][y][1] = 1;
+                game.board.wall[x][y] = 1;
             }
             else if (x == game.board.left + 1 && y == game.board.top + 1)
             {
@@ -94,137 +98,145 @@ void setBoardGrass()
                 }
             }
         }
+    }
+    }
+
+    if (type == BOARD_SANDBOX)
+    {
+    for (y = game.board.top; y < game.board.bottom; ++y)
+    {
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            game.board.wall[x][y] = 0;
+            if (x == game.board.left && y == game.board.top ||
+                x == game.board.right - 1 && y == game.board.top)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 1;
+                game.board.wall[x][y] = 1;
+            }
+            else if (x == game.board.left && y == game.board.bottom - 1 ||
+                x == game.board.right - 1 && y == game.board.bottom - 1)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 2;
+                game.board.wall[x][y] = 1;
+            }
+            else if (x == game.board.left)
+            {
+                game.board.texture[x][y][0] = 0;
+                game.board.texture[x][y][1] = 0;
+                game.board.wall[x][y] = 1;
+            }
+            else if (x == game.board.right - 1)
+            {
+                game.board.texture[x][y][0] = 3;
+                game.board.texture[x][y][1] = 0;
+                game.board.wall[x][y] = 1;
+            }
+            else if (y == game.board.top)
+            {
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 0;
+                game.board.wall[x][y] = 1;
+            }
+            else if (y == game.board.bottom - 1)
+            {
+                game.board.texture[x][y][0] = 4;
+                game.board.texture[x][y][1] = 0;
+                game.board.wall[x][y] = 1;
+            }
+            else
+            {
+                game.board.texture[x][y][0] = 1;
+                game.board.texture[x][y][1] = 0;
+            }
+        }
+    }
+    }
+
+    if (type == BOARD_VOLCANO)
+    {
+    for (y = game.board.top; y < game.board.bottom; ++y)
+    {
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            game.board.wall[x][y] = 0;
+            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
+            {
+                int walltype = rand() % 24;
+                if (walltype == 0)
+                {
+                    game.board.texture[x][y][0] = 0;
+                    game.board.texture[x][y][1] = 0;
+                }
+                else if (walltype == 1)
+                {
+                    game.board.texture[x][y][0] = 0;
+                    game.board.texture[x][y][1] = 1;
+                }
+                else
+                {
+                    game.board.texture[x][y][0] = 0;
+                    game.board.texture[x][y][1] = 3;
+                }
+                game.board.wall[x][y] = 1;
+            }
+            else
+            {
+                game.board.texture[x][y][0] = 3;
+                game.board.texture[x][y][1] = 0;
+            }
+        }
+    }
     }
 }
-void setBoardSandbox()
+void setBoardWall(int x, int y, BoardType type)
 {
-    int x, y;
-    for (y = game.board.top; y < game.board.bottom; ++y)
+    switch(type)
     {
-        for (x = game.board.left; x < game.board.right; ++x)
-        {
-            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
-            {
-                game.board.texture[x][y][0] = 3;
-                game.board.texture[x][y][1] = 1;
-            }
-            else if (x == game.board.left + 1 && y == game.board.top + 1)
-            {
-                game.board.texture[x][y][0] = 0;
-                game.board.texture[x][y][1] = 0;
-            }
-            else if (x == game.board.right - 2 && y == game.board.top + 1)
-            {
-                game.board.texture[x][y][0] = 2;
-                game.board.texture[x][y][1] = 0;
-            }
-            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
-            {
-                game.board.texture[x][y][0] = 0;
-                game.board.texture[x][y][1] = 2;
-            }
-            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
-            {
-                game.board.texture[x][y][0] = 2;
-                game.board.texture[x][y][1] = 2;
-            }
-            else if (x == game.board.left + 1)
-            {
-                game.board.texture[x][y][0] = 0;
-                game.board.texture[x][y][1] = 1;
-            }
-            else if (x == game.board.right - 2)
-            {
-                game.board.texture[x][y][0] = 2;
-                game.board.texture[x][y][1] = 1;
-            }
-            else if (y == game.board.top + 1)
-            {
-                game.board.texture[x][y][0] = 1;
-                game.board.texture[x][y][1] = 0;
-            }
-            else if (y == game.board.bottom - 2)
-            {
-                game.board.texture[x][y][0] = 1;
-                game.board.texture[x][y][1] = 2;
-            }
-            else
-            {
-                game.board.texture[x][y][0] = 1;
-                game.board.texture[x][y][1] = 1;
-                if (rand() % 12 == 0)
+        case BOARD_GRASS:
+            game.board.texture[game.board.left + x][game.board.top + y][0] = 3;
+            game.board.texture[game.board.left + x][game.board.top + y][1] = 1;
+            break;
+        case BOARD_SANDBOX:
+            game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+            game.board.texture[game.board.left + x][game.board.top + y][1] = 2;
+            break;
+        case BOARD_VOLCANO:
+            // game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+            // game.board.texture[game.board.left + x][game.board.top + y][1] = 3;
+                int walltype = rand() % 24;
+                if (walltype == 0)
                 {
-                    game.board.texture[x][y][0] = 3;
-                    game.board.texture[x][y][1] = 0;
+                    game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+                    game.board.texture[game.board.left + x][game.board.top + y][1] = 0;
                 }
-            }
-        }
+                else if (walltype == 1)
+                {
+                    game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+                    game.board.texture[game.board.left + x][game.board.top + y][1] = 1;
+                }
+                else
+                {
+                    game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+                    game.board.texture[game.board.left + x][game.board.top + y][1] = 3;
+                }
+            break;
+        default:
+            break;
     }
+    game.board.wall[game.board.left + x][game.board.top + y] = 1;
 }
-void setBoardVolcano()
+void setBoardCustomWall(int x, int y, int tx, int ty)
 {
-    int x, y;
-    for (y = game.board.top; y < game.board.bottom; ++y)
-    {
-        for (x = game.board.left; x < game.board.right; ++x)
-        {
-            if (x == game.board.left || x == game.board.right - 1 || y == game.board.top || y == game.board.bottom - 1)
-            {
-                game.board.texture[x][y][0] = 3;
-                game.board.texture[x][y][1] = 1;
-            }
-            else if (x == game.board.left + 1 && y == game.board.top + 1)
-            {
-                game.board.texture[x][y][0] = 0;
-                game.board.texture[x][y][1] = 0;
-            }
-            else if (x == game.board.right - 2 && y == game.board.top + 1)
-            {
-                game.board.texture[x][y][0] = 2;
-                game.board.texture[x][y][1] = 0;
-            }
-            else if (x == game.board.left + 1 && y == game.board.bottom - 2)
-            {
-                game.board.texture[x][y][0] = 0;
-                game.board.texture[x][y][1] = 2;
-            }
-            else if (x == game.board.right - 2 && y == game.board.bottom - 2)
-            {
-                game.board.texture[x][y][0] = 2;
-                game.board.texture[x][y][1] = 2;
-            }
-            else if (x == game.board.left + 1)
-            {
-                game.board.texture[x][y][0] = 0;
-                game.board.texture[x][y][1] = 1;
-            }
-            else if (x == game.board.right - 2)
-            {
-                game.board.texture[x][y][0] = 2;
-                game.board.texture[x][y][1] = 1;
-            }
-            else if (y == game.board.top + 1)
-            {
-                game.board.texture[x][y][0] = 1;
-                game.board.texture[x][y][1] = 0;
-            }
-            else if (y == game.board.bottom - 2)
-            {
-                game.board.texture[x][y][0] = 1;
-                game.board.texture[x][y][1] = 2;
-            }
-            else
-            {
-                game.board.texture[x][y][0] = 1;
-                game.board.texture[x][y][1] = 1;
-                if (rand() % 12 == 0)
-                {
-                    game.board.texture[x][y][0] = 3;
-                    game.board.texture[x][y][1] = 0;
-                }
-            }
-        }
-    }
+    game.board.texture[game.board.left + x][game.board.top + y][0] = tx;
+    game.board.texture[game.board.left + x][game.board.top + y][1] = ty;
+    game.board.wall[game.board.left + x][game.board.top + y] = 1;
+}
+void setBoardNothing(int x, int y)
+{
+    game.board.wall[game.board.left + x][game.board.top + y] = -1;
 }
 void spawnFood(int foodnum)
 {
@@ -372,7 +384,7 @@ void gameClassicInit()
     baseGameInit();
 
     makeBoard(16, 16);
-    setBoardGrass();
+    setBoard(BOARD_GRASS);
     spawnFood(16);
 }
 void gamePuzzleInit()
@@ -391,143 +403,313 @@ void gamePuzzleInit()
     animationFinish(0);
     animationPause(game.winAnim);
 
+    game.sandBoardImg = imageLoad("./img/sandboxmap.png");
+    game.volcanoBoardImg = imageLoad("./img/volcanomap.png");
+    game.volcanoWallAnim = animationCreate();
+    addFrame(0, 0, 4000);
+    addFrame(1, 0, 4000);
+    addFrame(2, 0, 4000);
+    animationFinish(1);
+    game.volcanoWall2Anim = animationCreate();
+    addFrame(0, 1, 4000);
+    addFrame(1, 1, 4000);
+    addFrame(2, 1, 4000);
+    animationFinish(1);
+
     switch(game.current_level)
     {
         case 0:
             makeBoard(5, 5);
-            setBoardGrass();
+            setBoard(BOARD_GRASS);
             putFood(1, 2);
-            putFood(2, 3);
+            putFood(2, 1);
             break;
         case 1:
             makeBoard(6, 6);
-            setBoardGrass();
+            setBoard(BOARD_GRASS);
             putFood(2, 2);
             putFood(3, 2);
             putFood(2, 4);
             putFood(4, 3);
+            setBoardWall(4, 1, BOARD_GRASS);
+            setBoardWall(4, 4, BOARD_GRASS);
             break;
         case 2:
-            makeBoard(6, 8);
-            setBoardGrass();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            makeBoard(7, 8);
+            setBoard(BOARD_GRASS);
+            setBoardWall(2, 2, BOARD_GRASS);
+            setBoardWall(2, 3, BOARD_GRASS);
+            setBoardWall(2, 4, BOARD_GRASS);
+            setBoardWall(2, 5, BOARD_GRASS);
+            putFood(1, 2);
+            putFood(1, 3);
+            putFood(1, 4);
+            putFood(1, 5);
+            putFood(4, 1);
+            putFood(4, 6);
+
             break;
         case 3:
-            makeBoard(6, 8);
-            setBoardGrass();
+            makeBoard(16, 8);
+            setBoard(BOARD_GRASS);
+            putSnake(2, 7);
+            setBoardWall(2, 4, BOARD_GRASS);
+            setBoardWall(3, 4, BOARD_GRASS);
+            setBoardWall(3, 3, BOARD_GRASS);
+            setBoardWall(3, 2, BOARD_GRASS);
+            setBoardWall(3, 1, BOARD_GRASS);
+            setBoardWall(5, 3, BOARD_GRASS);
+            setBoardWall(6, 3, BOARD_GRASS);
+            setBoardWall(7, 3, BOARD_GRASS);
+            setBoardWall(8, 3, BOARD_GRASS);
+            setBoardWall(8, 4, BOARD_GRASS);
+            setBoardWall(8, 5, BOARD_GRASS);
+            setBoardWall(8, 6, BOARD_GRASS);
+            setBoardWall(5, 2, BOARD_GRASS);
+            setBoardWall(7, 1, BOARD_GRASS);
+            setBoardWall(11, 4, BOARD_GRASS);
+            setBoardWall(12, 5, BOARD_GRASS);
             putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            putFood(1, 4);
+            putFood(13, 5);
+            putFood(12, 4);
+            putFood(11, 3);
+            putFood(7, 2);
+            putFood(5, 1);
+            putFood(7, 4);
+            putFood(7, 5);
             break;
-
-
         case 4:
-            makeBoard(6, 8);
-            setBoardSandbox();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            makeBoard(5, 5);
+            setBoard(BOARD_SANDBOX);
+            setBoardNothing(4, 0);
+            setBoardNothing(0, 0);
+            setBoardCustomWall(3, 0, 0, 1);
+            setBoardCustomWall(1, 0, 0, 1);
+            setBoardWall(3, 1, BOARD_SANDBOX);
+            setBoardWall(4, 1, BOARD_SANDBOX);
+            setBoardWall(0, 1, BOARD_SANDBOX);
+            setBoardWall(1, 1, BOARD_SANDBOX);
+            putFood(1, 2);
+            putFood(2, 1);
             break;
         case 5:
-            makeBoard(6, 8);
-            setBoardSandbox();
+            makeBoard(10, 7);
+            setBoard(BOARD_SANDBOX);
+            putSnake(6, 5);
+            setBoardWall(3, 2, BOARD_SANDBOX);
+            setBoardCustomWall(4, 2, 4, 0);
+            setBoardCustomWall(5, 2, 4, 0);
+            setBoardCustomWall(6, 2, 4, 0);
+            setBoardWall(7, 2, BOARD_SANDBOX);
+            setBoardCustomWall(7, 3, 0, 0);
+            setBoardWall(7, 4, BOARD_SANDBOX);
+            setBoardCustomWall(6, 4, 2, 0);
+            setBoardCustomWall(5, 4, 2, 0);
+            setBoardCustomWall(4, 4, 2, 0);
+            setBoardWall(3, 4, BOARD_SANDBOX);
+            setBoardCustomWall(3, 3, 3, 0);
+            setBoardNothing(4, 3);
+            setBoardNothing(5, 3);
+            setBoardNothing(6, 3);
             putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            putFood(1, 2);
+            putFood(1, 3);
+            putFood(2, 3);
+            putFood(1, 4);
+            putFood(2, 4);
             break;
         case 6:
-            makeBoard(6, 8);
-            setBoardSandbox();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            makeBoard(11, 11);
+            setBoard(BOARD_SANDBOX);
+            putSnake(6, 10);
+            setBoardCustomWall(4, 3, 5, 0);
+            setBoardWall(3, 4, BOARD_SANDBOX);
+            setBoardCustomWall(3, 3, 0, 1);
+            setBoardCustomWall(3, 6, 0, 1);
+            setBoardWall(3, 7, BOARD_SANDBOX);
+            setBoardCustomWall(5, 8, 0, 1);
+            setBoardCustomWall(5, 9, 6, 0);
+            setBoardWall(2, 4, BOARD_SANDBOX);
+            setBoardWall(5, 3, BOARD_SANDBOX);
+            setBoardCustomWall(6, 3, 5, 0);
+            setBoardCustomWall(7, 3, 5, 0);
+            setBoardCustomWall(8, 3, 5, 0);
+            setBoardWall(9, 3, BOARD_SANDBOX);
+            setBoardWall(5, 5, BOARD_SANDBOX);
+            setBoardCustomWall(6, 5, 5, 0);
+            setBoardCustomWall(7, 5, 0, 1);
+            setBoardWall(7, 7, BOARD_SANDBOX);
+            setBoardCustomWall(7, 6, 6, 0);
+            setBoardCustomWall(8, 7, 5, 0);
+            setBoardCustomWall(9, 7, 5, 0);
+            setBoardCustomWall(1, 1, 2, 0);
+            setBoardCustomWall(2, 1, 2, 0);
+            setBoardWall(3, 1, BOARD_SANDBOX);
+            setBoardCustomWall(5, 2, 0, 1);
+            setBoardWall(7, 1, BOARD_SANDBOX);
+            setBoardCustomWall(9, 2, 0, 1);
+            setBoardCustomWall(0, 1, 0, 1);
+            setBoardCustomWall(3, 0, 0, 1);
+            setBoardCustomWall(7, 0, 0, 1);
+            setBoardWall(5, 10, BOARD_SANDBOX);
+            setBoardWall(10, 7, BOARD_SANDBOX);
+            setBoardNothing(0, 0);
+            setBoardNothing(1, 0);
+            setBoardNothing(2, 0);
+            setBoardCustomWall(10, 2, 0, 1);
+            putFood(4, 7);
+            putFood(4, 6);
+            putFood(4, 5);
+            putFood(4, 4);
+            putFood(1, 9);
+            putFood(9, 1);
+            putFood(9, 9);
             break;
         case 7:
-            makeBoard(6, 8);
-            setBoardSandbox();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            makeBoard(8, 16);
+            setBoard(BOARD_SANDBOX);
+            setBoardCustomWall(0, 13, 0, 1);
+            setBoardCustomWall(1, 13, 5, 0);
+            setBoardCustomWall(2, 13, 5, 0);
+            setBoardCustomWall(3, 13, 5, 0);
+            setBoardCustomWall(4, 13, 5, 0);
+            setBoardWall(5, 13, BOARD_SANDBOX);
+            
+            setBoardCustomWall(7, 11, 0, 1);
+            setBoardCustomWall(6, 11, 5, 0);
+            setBoardCustomWall(5, 11, 5, 0);
+            setBoardCustomWall(4, 11, 5, 0);
+            setBoardCustomWall(3, 11, 5, 0);
+
+            setBoardWall(2, 11, BOARD_SANDBOX);
+            setBoardCustomWall(2, 10, 6, 0);
+            setBoardCustomWall(2, 9, 6, 0);
+            setBoardCustomWall(2, 8, 0, 1);
+
+            setBoardCustomWall(0, 6, 0, 1);
+            setBoardCustomWall(1, 6, 5, 0);
+            setBoardCustomWall(2, 6, 5, 0);
+            setBoardCustomWall(3, 6, 5, 0);
+            
+            setBoardCustomWall(4, 6, 0, 1);
+            setBoardCustomWall(4, 7, 6, 0);
+            setBoardCustomWall(4, 8, 6, 0);
+
+            setBoardWall(4, 9, BOARD_SANDBOX);
+            setBoardWall(5, 9, BOARD_SANDBOX);
+
+            setBoardCustomWall(7, 7, 0, 1);
+            setBoardWall(6, 7, BOARD_SANDBOX);
+            setBoardCustomWall(6, 6, 3, 0);
+            setBoardCustomWall(6, 5, 3, 0);
+            setBoardCustomWall(6, 4, 0, 1);
+            setBoardWall(7, 4, BOARD_SANDBOX);
+            setBoardNothing(7, 5);
+            setBoardNothing(7, 6);
+
+            setBoardCustomWall(0, 2, 0, 1);
+            setBoardCustomWall(1, 2, 5, 0);
+            setBoardCustomWall(2, 2, 5, 0);
+            setBoardCustomWall(3, 2, 5, 0);
+            setBoardCustomWall(4, 2, 5, 0);
+            setBoardWall(5, 2, BOARD_SANDBOX);
+
+            setBoardWall(2, 4, BOARD_SANDBOX);
+            setBoardCustomWall(3, 4, 5, 0);
+            setBoardCustomWall(4, 4, 5, 0);
+            setBoardCustomWall(5, 4, 5, 0);
+
+            game.snake.length = 4;
+            putSnake(7, 14);
+            moveSnake(1, 0);
+            putFood(1, 1);
             break;
 
         case 8:
-            makeBoard(6, 8);
-            setBoardVolcano();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            makeBoard(16, 8);
+            setBoard(BOARD_VOLCANO);
+            setBoardNothing(0, 0);
+            setBoardNothing(1, 0);
+            setBoardNothing(2, 0);
+            setBoardNothing(3, 0);
+            setBoardNothing(4, 0);
+            setBoardNothing(5, 0);
+            setBoardNothing(6, 0);
+            setBoardNothing(7, 0);
+            setBoardNothing(8, 0);
+            setBoardNothing(9, 0);
+            setBoardNothing(10, 0);
+            setBoardNothing(11, 0);
+            setBoardNothing(0, 1);
+            setBoardNothing(1, 1);
+            setBoardNothing(2, 1);
+            setBoardNothing(3, 1);
+            setBoardNothing(4, 1);
+            setBoardNothing(5, 1);
+            setBoardNothing(6, 1);
+            setBoardNothing(7, 1);
+            setBoardNothing(8, 1);
+            setBoardNothing(9, 1);
+            setBoardNothing(10, 1);
+            setBoardNothing(11, 1);
+            setBoardNothing(0, 2);
+            setBoardNothing(1, 2);
+            setBoardNothing(2, 2);
+            setBoardNothing(3, 2);
+            setBoardNothing(4, 2);
+            setBoardNothing(5, 2);
+            setBoardNothing(6, 2);
+            setBoardNothing(7, 2);
+            setBoardNothing(8, 2);
+            setBoardNothing(9, 2);
+            setBoardNothing(10, 2);
+            setBoardNothing(11, 2);
+            setBoardNothing(0, 3);
+            setBoardNothing(1, 3);
+            setBoardNothing(2, 3);
+            setBoardNothing(3, 3);
+            setBoardNothing(4, 3);
+            setBoardNothing(5, 3);
+            setBoardNothing(6, 3);
+            setBoardNothing(7, 3);
+            setBoardNothing(8, 3);
+            setBoardNothing(9, 3);
+            setBoardNothing(10, 3);
+            setBoardNothing(11, 3);
+
+            setBoardWall(1, 4, BOARD_VOLCANO);
+            setBoardWall(2, 4, BOARD_VOLCANO);
+            setBoardWall(3, 4, BOARD_VOLCANO);
+            setBoardWall(4, 4, BOARD_VOLCANO);
+            setBoardWall(5, 4, BOARD_VOLCANO);
+            setBoardWall(6, 4, BOARD_VOLCANO);
+            setBoardWall(7, 4, BOARD_VOLCANO);
+            setBoardWall(8, 4, BOARD_VOLCANO);
+            setBoardWall(9, 4, BOARD_VOLCANO);
+            setBoardWall(10, 4, BOARD_VOLCANO);
+            setBoardWall(11, 4, BOARD_VOLCANO);
+            setBoardWall(12, 4, BOARD_VOLCANO);
+            setBoardWall(12, 3, BOARD_VOLCANO);
+            setBoardWall(12, 2, BOARD_VOLCANO);
+            setBoardWall(12, 1, BOARD_VOLCANO);
+            putSnake(2, 9);
+            putFood(14, 2);
+            putFood(13, 1);
             break;
         case 9:
             makeBoard(6, 8);
-            setBoardVolcano();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            setBoard(BOARD_VOLCANO);
             putFood(2, 2);
             break;
         case 10:
             makeBoard(6, 8);
-            setBoardVolcano();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            setBoard(BOARD_VOLCANO);
             putFood(2, 2);
             break;
         case 11:
             makeBoard(6, 8);
-            setBoardVolcano();
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
-            putFood(2, 2);
+            setBoard(BOARD_VOLCANO);
             putFood(2, 2);
             break;
         default:
@@ -689,6 +871,10 @@ void moveSnake(int xdelta, int ydelta)
 
     game.snake.parts[0].x += xdelta;
     game.snake.parts[0].y += ydelta;
+
+    // remove
+    printf("snake moved to board position %i %i\n",
+            game.snake.parts[0].x - game.board.left, game.snake.parts[0].y - game.board.top);
 
     game.snake.parts[0].last_move_direction = getMoveDirection(xdelta, ydelta);
 }
@@ -893,32 +1079,116 @@ void drawFood()
         if (game.foods[i].eaten)
             continue;
 
-        imageDraw(game.grassBoardImg, game.foods[i].x, game.foods[i].y, 3, 2, __LINE__);
+        if (game.current_level > 3 && game.current_level < 8)
+        {
+            imageDraw(game.sandBoardImg, game.foods[i].x, game.foods[i].y, 2, 1, __LINE__);
+        } else if (game.current_level > 7)
+        {
+            imageDraw(game.volcanoBoardImg, game.foods[i].x, game.foods[i].y, 0, 2, __LINE__);
+        } else
+        {
+            imageDraw(game.grassBoardImg, game.foods[i].x, game.foods[i].y, 3, 2, __LINE__);
+        }
     }
 }
 void drawBoard()
 {
-    // remember 0 is top and 16 or something is bottom
     int x, y;
-    for (y = game.board.top; y < game.board.bottom; ++y)
+
+    if (game.state == GAME_CLASSIC)
     {
-        for (x = game.board.left; x < game.board.right; ++x)
+        for (y = game.board.top; y < game.board.bottom; ++y)
         {
-            imageDraw(game.grassBoardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
+            for (x = game.board.left; x < game.board.right; ++x)
+            {
+                if (game.board.wall[x][y] == -1)
+                {
+                    continue;
+                }
+                imageDraw(game.grassBoardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
+            }
         }
+        return;
+    }
+
+    switch(game.current_level)
+    {
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        // remember 0 is top and 16 or something is bottom
+        for (y = game.board.top; y < game.board.bottom; ++y)
+        {
+            for (x = game.board.left; x < game.board.right; ++x)
+            {
+                if (game.board.wall[x][y] == -1)
+                {
+                    continue;
+                }
+                imageDraw(game.sandBoardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
+            }
+        }
+        break;
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+        for (y = game.board.top; y < game.board.bottom; ++y)
+        {
+            for (x = game.board.left; x < game.board.right; ++x)
+            {
+                if (game.board.wall[x][y] == -1)
+                {
+                    continue;
+                }
+                if (game.board.texture[x][y][0] == 0 && game.board.texture[x][y][1] == 0)
+                {
+                    imageDrawAnimated(game.volcanoBoardImg, x, y, game.volcanoWallAnim, __LINE__);
+                }
+                else if (game.board.texture[x][y][0] == 0 && game.board.texture[x][y][1] == 1)
+                {
+                    imageDrawAnimated(game.volcanoBoardImg, x, y, game.volcanoWall2Anim, __LINE__);
+                }
+                else
+                {
+                    imageDraw(game.volcanoBoardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
+                }
+            }
+        }
+        break;
+    default:
+        for (y = game.board.top; y < game.board.bottom; ++y)
+        {
+            for (x = game.board.left; x < game.board.right; ++x)
+            {
+                if (game.board.wall[x][y] == -1)
+                {
+                    continue;
+                }
+                imageDraw(game.grassBoardImg, x, y, game.board.texture[x][y][0], game.board.texture[x][y][1], __LINE__);
+            }
+        }
+        break;
     }
 }
 
 void classicRules()
 {
-    int i;
+    int i, x, y;
 
-    if (game.snake.parts[0].x == game.board.left ||
-        game.snake.parts[0].x == game.board.right - 1 ||
-        game.snake.parts[0].y == game.board.top ||
-        game.snake.parts[0].y == game.board.bottom - 1)
+    for (y = game.board.top; y < game.board.bottom; ++y)
     {
-        gameGoTo(GAME_LOST_CLASSIC);
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            if (game.board.wall[x][y] == 0)
+                continue;
+
+            if (game.snake.parts[0].x == x && game.snake.parts[0].y == y)
+            {
+                gameGoTo(GAME_LOST_CLASSIC);
+            }
+        }
     }
 
     for (i = 1; i < game.snake.length; ++i)
@@ -955,92 +1225,33 @@ void classicRules()
 }
 void puzzleRules()
 {
-    int i;
-    switch(game.current_level)
+    int i, x, y;
+
+    int won = 1;
+    for (i = 0; i < game.foodcount; ++i)
     {
-    case 0:
-        if (game.snake.length >= 4)
+        if (!game.foods[i].eaten)
         {
-            gameGoTo(GAME_WON);
+            won = 0;
         }
-        break;
-    case 1:
-        if (game.snake.length >= 6)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 2:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 3:
-        if (game.snake.length >= 10)
-        {
-            printf("hello???????????????????????????\n");
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 4:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 5:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 6:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 7:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 8:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 9:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 10:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    case 11:
-        if (game.snake.length >= 10)
-        {
-            gameGoTo(GAME_WON);
-        }
-        break;
-    default:
-        break;
+    }
+    if (won)
+    {
+        gameGoTo(GAME_WON);
     }
 
-    if (game.snake.parts[0].x == game.board.left ||
-        game.snake.parts[0].x == game.board.right - 1 ||
-        game.snake.parts[0].y == game.board.top ||
-        game.snake.parts[0].y == game.board.bottom - 1)
+    for (y = game.board.top; y < game.board.bottom; ++y)
     {
-        gameGoTo(GAME_LOST_PUZZLE);
+        for (x = game.board.left; x < game.board.right; ++x)
+        {
+            if (game.board.wall[x][y] == 0)
+                continue;
+
+            if (game.snake.parts[0].x == x && game.snake.parts[0].y == y)
+            {
+                gameGoTo(GAME_LOST_PUZZLE);
+            }
+        }
     }
 
     for (i = 1; i < game.snake.length; ++i)
