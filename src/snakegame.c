@@ -204,24 +204,22 @@ void setBoardWall(int x, int y, BoardType type)
             game.board.texture[game.board.left + x][game.board.top + y][1] = 2;
             break;
         case BOARD_VOLCANO:
-            // game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
-            // game.board.texture[game.board.left + x][game.board.top + y][1] = 3;
-                int walltype = rand() % 24;
-                if (walltype == 0)
-                {
-                    game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
-                    game.board.texture[game.board.left + x][game.board.top + y][1] = 0;
-                }
-                else if (walltype == 1)
-                {
-                    game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
-                    game.board.texture[game.board.left + x][game.board.top + y][1] = 1;
-                }
-                else
-                {
-                    game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
-                    game.board.texture[game.board.left + x][game.board.top + y][1] = 3;
-                }
+            int walltype = rand() % 24;
+            if (walltype == 0)
+            {
+                game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+                game.board.texture[game.board.left + x][game.board.top + y][1] = 0;
+            }
+            else if (walltype == 1)
+            {
+                game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+                game.board.texture[game.board.left + x][game.board.top + y][1] = 1;
+            }
+            else
+            {
+                game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
+                game.board.texture[game.board.left + x][game.board.top + y][1] = 3;
+            }
             break;
         default:
             break;
