@@ -15,18 +15,18 @@
 
 // game plan
 
+// no details plan:
+    // unlock system
+    // lose screen bug puzzle
+    // makeboard for puzzles 1-3
+
 // lose screen for puzzle is broken
-// make food move over or down if it's on top of another food
-// make lvl1init function that is run after puzzle init, and take the level1 specific stuff from puzzleinit and put it here
-// make lvl2 and lvl3init
-// also lvl1 lvl2 and lvl3 rules
-// rename game.level to game.levelsunlocked
 // add three level selection images, and draw them based on how many levels are unlocked
-// change selectRules to allow clicking on any unlocked level images
+// change selectRules to allow clicking on any unlocked level images (the unlocked part is not done)
+// make food move over or down if it's on top of another food
 // rename setboardgrass to setboardclassicgrass and make three more identical makeboard functions for makeboardpuzzle1-3
 // add set obstacles to lvl1-3 boards
 // add rules in lvl1-3 rules to treat the set obstacles like walls
-// make a different win condition for each lvl1-3 rules
 
 // transition
 // make transition animation and make sure it looks right by playing it at the start of one of the scenes
@@ -125,6 +125,7 @@ typedef struct
     ScreenCursor menuCursor;
 
     Image *selectImg;
+    Animation *selectBGAnim;
 
     Music *lowMus;
     Music *highMus;

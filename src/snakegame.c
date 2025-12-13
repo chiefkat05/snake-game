@@ -142,6 +142,13 @@ void gameMenuInit()
 void gameSelectInit()
 {
     game.selectImg = imageLoad("./img/selectmap.png");
+
+    game.selectBGAnim = animationCreate();
+    addFrame(0, 0, 8000);
+    addFrame(8, 0, 8000);
+    addFrame(0, 8, 8000);
+    addFrame(8, 8, 8000);
+    animationFinish(1);
 }
 void baseGameInit()
 {
@@ -717,7 +724,7 @@ void puzzleRules()
         game.snake.parts[0].y == game.board.top ||
         game.snake.parts[0].y == game.board.bottom - 1)
     {
-        gameGoTo(GAME_LOST_CLASSIC);
+        gameGoTo(GAME_LOST_PUZZLE);
     }
 
     for (i = 1; i < game.snake.length; ++i)
@@ -725,7 +732,7 @@ void puzzleRules()
         if (game.snake.parts[0].x == game.snake.parts[i].x &&
             game.snake.parts[0].y == game.snake.parts[i].y)
         {
-            gameGoTo(GAME_LOST_CLASSIC);
+            gameGoTo(GAME_LOST_PUZZLE);
         }
     }
 
@@ -780,19 +787,29 @@ void menuRules()
 void selectRules()
 {
     settleCursor(&game.menuCursor);
-    if (game.menuCursor.x > 1 && game.menuCursor.x < 5 && game.menuCursor.y > 1 && game.menuCursor.y < 5)
+
+    if (game.menuCursor.x > 15)
+        game.menuCursor.x = 15;
+    if (game.menuCursor.x < 0)
+        game.menuCursor.x = 0;
+    if (game.menuCursor.y > 15)
+        game.menuCursor.y = 15;
+    if (game.menuCursor.y < 0)
+        game.menuCursor.y = 0;
+
+    if (game.menuCursor.x > 1 && game.menuCursor.x < 4 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
     {
         alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
             gameGoTo(GAME_PUZZLE1);
     }
-    if (game.menuCursor.x > 6 && game.menuCursor.x < 10 && game.menuCursor.y > 1 && game.menuCursor.y < 5)
+    if (game.menuCursor.x > 4 && game.menuCursor.x < 7 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
     {
         alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
             gameGoTo(GAME_PUZZLE2);
     }
-    if (game.menuCursor.x > 11 && game.menuCursor.x < 15 && game.menuCursor.y > 1 && game.menuCursor.y < 5)
+    if (game.menuCursor.x > 8 && game.menuCursor.x < 11 && game.menuCursor.y > 5 && game.menuCursor.y < 8)
     {
         alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
@@ -1068,8 +1085,26 @@ void gameLoop()
             game_caught_up = gameCaughtUp();
         }
 
-        imageDrawLarge(game.selectImg, 0, 0, 0, 0, 16, 16, __LINE__);
-        imageDrawLarge(game.selectImg, 2, 2, 16, 0, 2, 2, __LINE__);
+        imageDrawLargeAnimated(game.selectImg, 0, 0, game.selectBGAnim, 8, 8, __LINE__);
+        imageDrawLargeAnimated(game.selectImg, 8, 0, game.selectBGAnim, 8, 8, __LINE__);
+        imageDrawLargeAnimated(game.selectImg, 0, 8, game.selectBGAnim, 8, 8, __LINE__);
+        imageDrawLargeAnimated(game.selectImg, 8, 8, game.selectBGAnim, 8, 8, __LINE__);
+        // grass
+        imageDrawLarge(game.selectImg, 2, 6, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 5, 6, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 9, 6, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 12, 6, 16, 0, 2, 2, __LINE__);
+        // sandbox
+        imageDrawLarge(game.selectImg, 2, 9, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 5, 9, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 9, 9, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 12, 9, 16, 0, 2, 2, __LINE__);
+        // volcano
+        imageDrawLarge(game.selectImg, 2, 12, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 5, 12, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 9, 12, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 12, 12, 16, 0, 2, 2, __LINE__);
+        imageDrawLarge(game.selectImg, 1, 2, 16, 2, 14, 2, __LINE__);
         drawMenuCursor();
         break;
     case GAME_PUZZLE1:
