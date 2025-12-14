@@ -32,7 +32,11 @@ void musicPlay(Music *mus, int line)
     verify(mus, "music doesn't exist", line);
 
     Mix_PlayChannel(-1, mus->snd, -1);
-    Mix_VolumeChunk(mus->snd, 0);
+    // Mix_VolumeChunk(mus->snd, 0);
+}
+void musicStop()
+{
+    Mix_HaltChannel(-1);
 }
 void musicFree(Music *mus)
 {

@@ -12,7 +12,7 @@ typedef struct _Music
     struct _Music *next;
 } Music;
 
-#define MAX_MUSIC 4
+#define MAX_MUSIC 16
 typedef struct
 {
     Music music[MAX_MUSIC];
@@ -28,6 +28,7 @@ void musicPlay(Music *mus, int line);
 void musicFree(Music *mus);
 void musicFadeIn(Music *mus, int line);
 void musicFadeOut(Music *mus, int line);
+void musicStop();
 
 void musicPoolFreeAll();
 

@@ -136,13 +136,20 @@ typedef struct
     Image *selectImg;
     Animation *selectBGAnim;
 
-    Music *lowMus;
-    Music *highMus;
+    Music *menuMus;
+    Music *selectMus;
+    Music *grassMus;
+    Music *sandboxMus;
+    Music *volcanoMus;
+    Music *winMus;
+    Music *lostMus;
+    Music *eatSnd;
+    Music *moveSnd;
+    Music *explodeSnd;
 } Game;
 extern Game game;
 
 void makeBoard(int width, int height);
-void setBoardGrass();
 void spawnFood(int foodnum);
 void putFood(int x, int y);
 void gameMenuInit();
