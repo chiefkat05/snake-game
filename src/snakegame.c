@@ -391,7 +391,7 @@ void baseGameInit()
     addFrame(8, 3, 400);
     animationFinish(1);
 
-    fontLoad(&game.font, "./img/textmap.png", "0123456789:?!.,-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/");
+    fontLoad(&game.font, "./img/textmap.png", "0123456789:?!.,-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/ ");
 }
 void gameClassicInit()
 {
@@ -1836,51 +1836,51 @@ void drawPuzzleObjective(char *textbuf)
     switch(game.current_level)
     {
         case 0:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 2);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 2);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 1:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 4);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 4);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 2:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 6);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 6);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 3:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 9);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 9);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 4:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 2);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 2);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 5:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 6);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 6);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 6:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 7);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 7);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 7:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 4, 1);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 4, 1);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 8:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 2);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 2);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 9:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 9);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 2, 9);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 10:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 3, 9);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 3, 9);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 11:
-            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 6, 9);
+            sprintf(textbuf, "%s %i/%02i", "FOOD:", game.snake.length - 6, 9);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         default:
@@ -2267,7 +2267,7 @@ void gameLoop()
         drawBoard();
         drawFood();
         drawSnake();
-        sprintf(textbuf, "%s%d", "Score: ", game.snake.length - 2);
+        sprintf(textbuf, "%s%d", "SCORE: ", game.snake.length - 2);
         imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
         break;
     case GAME_SELECT:
@@ -2336,6 +2336,7 @@ void gameLoop()
             }
         }
         imageDrawText(textbuf, &game.font, game.loseAnim->frame / 3, (float)game.loseAnim->frame / 1.5f, __LINE__);
+        imageDrawText("ESC TO RETURN", &game.font, 2, 14, __LINE__);
         break;
     case GAME_LOST_PUZZLE:
         handleLostPuzzleInput();
@@ -2356,6 +2357,7 @@ void gameLoop()
             }
         }
         imageDrawText(textbuf, &game.font, game.loseAnim->frame / 3, (float)game.loseAnim->frame / 1.5f, __LINE__);
+        imageDrawText("ESC TO RETURN", &game.font, 2, 14, __LINE__);
         break;
     case GAME_WON:
         handleWonInput();
@@ -2373,12 +2375,14 @@ void gameLoop()
         drawBoard();
         drawFood();
         drawSnake();
-        imageDrawLargeAnimated(game.winTextImg, 0, 4, game.winAnim, 16, 2, __LINE__);
+        // imageDrawLargeAnimated(game.winTextImg, 0, 4, game.winAnim, 16, 2, __LINE__);
+        imageDrawText("YOU WIN", &game.font, 5, 4, __LINE__);
+        imageDrawText("PRESS ANY KEY", &game.font, 2, 7, __LINE__);
         if (game.winAnim->frame == game.winAnim->framecount - 1)
         {
             imageDrawLarge(game.winTextImg, 0, 6, 0, 30, 16, 2, __LINE__);
         }
-        imageDrawText(textbuf, &game.font, game.winAnim->frame / 3, (float)game.winAnim->frame * 1.5, __LINE__);
+        imageDrawText(textbuf, &game.font, game.winAnim->frame / 2, (float)game.winAnim->frame * 1.5, __LINE__);
         break;
     default:
         // while (!game_caught_up)
