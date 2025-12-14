@@ -15,7 +15,8 @@
 
 // game plan
 
-
+// go through all the graphics and update anything that isn't up to standard
+// make the sfx and music for menu, select, classic, sandbox, and volcano
 
 #define MAX_FOODS 16
 typedef struct
