@@ -18,6 +18,8 @@
 // go through all the graphics and update anything that isn't up to standard
 // make the sfx and music for menu, select, classic, sandbox, and volcano
 
+// if you REALLY somehow have time add transition too (it would increase style points by at least 110%)
+
 #define MAX_FOODS 16
 typedef struct
 {
@@ -128,6 +130,8 @@ typedef struct
     Animation *menuCursorAnim;
     Animation *menuCursorWaitAnim;
     ScreenCursor menuCursor;
+    Animation *menuSnakeBlinkAnim;
+    Animation *menuTitleShineAnim;
 
     Image *selectImg;
     Animation *selectBGAnim;

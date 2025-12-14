@@ -177,15 +177,15 @@ void setBoard(BoardType type)
                 }
                 else
                 {
-                    game.board.texture[x][y][0] = 0;
-                    game.board.texture[x][y][1] = 3;
+                    game.board.texture[x][y][0] = 1;
+                    game.board.texture[x][y][1] = 2;
                 }
                 game.board.wall[x][y] = 1;
             }
             else
             {
-                game.board.texture[x][y][0] = 3;
-                game.board.texture[x][y][1] = 0;
+                game.board.texture[x][y][0] = 2;
+                game.board.texture[x][y][1] = 2;
             }
         }
     }
@@ -217,8 +217,8 @@ void setBoardWall(int x, int y, BoardType type)
             }
             else
             {
-                game.board.texture[game.board.left + x][game.board.top + y][0] = 0;
-                game.board.texture[game.board.left + x][game.board.top + y][1] = 3;
+                game.board.texture[game.board.left + x][game.board.top + y][0] = 1;
+                game.board.texture[game.board.left + x][game.board.top + y][1] = 2;
             }
             break;
         default:
@@ -274,6 +274,22 @@ void gameMenuInit()
     addFrame(18, 3, 4000);
     addFrame(19, 3, 4000);
     addFrame(20, 3, 4000);
+    animationFinish(1);
+
+    game.menuSnakeBlinkAnim = animationCreate();
+    addFrame(16, 6, 80000);
+    addFrame(18, 6, 2000);
+    addFrame(16, 6, 60000);
+    addFrame(18, 6, 2000);
+    addFrame(16, 8, 5000);
+    addFrame(18, 6, 2000);
+    animationFinish(1);
+    game.menuTitleShineAnim = animationCreate();
+    addFrame(32, 0, 90000);
+    addFrame(20, 5, 1000);
+    addFrame(20, 10, 1000);
+    addFrame(32, 5, 1000);
+    addFrame(32, 10, 1000);
     animationFinish(1);
 
     game.menuCursor.x = screen_width / (2 * IMG_PIXEL_SIZE);
@@ -2198,10 +2214,13 @@ void gameLoop()
         }
 
         imageDrawLarge(game.menuImg, 0, 0, 0, 0, 16, 16, __LINE__);
+        imageDrawLargeAnimated(game.menuImg, 5, 6, game.menuSnakeBlinkAnim, 2, 2, __LINE__);
+        imageDrawLargeAnimated(game.menuImg, 2, 1, game.menuTitleShineAnim, 11, 4, __LINE__);
+
         imageDrawLarge(game.menuImg, 12, 14, 20, 0, 4, 2, __LINE__);
 
-        imageDrawLarge(game.menuImg, 2, 8, 24, 0, 5, 2, __LINE__);
-        imageDrawLarge(game.menuImg, 10, 8, 24, 2, 5, 2, __LINE__);
+        imageDrawLarge(game.menuImg, 5, 9, 24, 0, 6, 2, __LINE__);
+        imageDrawLarge(game.menuImg, 5, 11, 24, 2, 7, 2, __LINE__);
         drawMenuCursor();
         break;
     case GAME_CLASSIC:
