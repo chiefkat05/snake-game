@@ -1666,13 +1666,13 @@ void menuRules()
     if (game.menuCursor.y < 0)
         game.menuCursor.y = 0;
 
-    if (game.menuCursor.x > 1 && game.menuCursor.x < 8 && game.menuCursor.y >= 8 && game.menuCursor.y <= 10)
+    if (game.menuCursor.x > 4 && game.menuCursor.x < 11 && game.menuCursor.y >= 9 && game.menuCursor.y <= 10)
     {
         alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
             gameGoTo(GAME_SELECT);
     }
-    if (game.menuCursor.x > 9 && game.menuCursor.x < 15 && game.menuCursor.y >= 8 && game.menuCursor.y <= 10)
+    if (game.menuCursor.x > 4 && game.menuCursor.x < 12 && game.menuCursor.y >= 12 && game.menuCursor.y <= 13)
     {
         alertCursor(&game.menuCursor);
         if (game.menuCursor.activated)
@@ -1836,15 +1836,51 @@ void drawPuzzleObjective(char *textbuf)
     switch(game.current_level)
     {
         case 0:
-            sprintf(textbuf, "%s %i/%02i", "Length:", game.snake.length - 2, 2);
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 2);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 1:
-            sprintf(textbuf, "%s %i/%02i", "Length:", game.snake.length - 2, 4);
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 4);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         case 2:
-            sprintf(textbuf, "%s %i/%02i", "Length:", game.snake.length - 2, 8);
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 6);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 3:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 9);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 4:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 2);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 5:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 6);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 6:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 7);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 7:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 4, 1);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 8:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 2);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 9:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 2, 9);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 10:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 3, 9);
+            imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
+            break;
+        case 11:
+            sprintf(textbuf, "%s %i/%02i", "Food:", game.snake.length - 6, 9);
             imageDrawText(textbuf, &game.font, 0, 0, __LINE__);
             break;
         default:
@@ -2103,11 +2139,11 @@ void drawLevelIcons()
         }
         else if (game.unlocked_levelcount == 7)
         {
-            imageDrawLarge(game.selectImg, 9, 9, 20, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 9, 9, 20, 10, 2, 2, __LINE__);
         }
         else
         {
-            imageDrawLarge(game.selectImg, 9, 9, 22, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 9, 9, 22, 10, 2, 2, __LINE__);
         }
         if (game.unlocked_levelcount < 8)
         {
@@ -2115,17 +2151,13 @@ void drawLevelIcons()
         }
         else if (game.unlocked_levelcount == 8)
         {
-            imageDrawLarge(game.selectImg, 12, 9, 28, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 12, 9, 28, 10, 2, 2, __LINE__);
         }
         else
         {
-            imageDrawLarge(game.selectImg, 12, 9, 30, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 12, 9, 30, 10, 2, 2, __LINE__);
         }
     }
-    // imageDrawLarge(game.selectImg, 2, 9, 16, 0, 2, 2, __LINE__);
-    // imageDrawLarge(game.selectImg, 5, 9, 16, 0, 2, 2, __LINE__);
-    // imageDrawLarge(game.selectImg, 9, 9, 16, 0, 2, 2, __LINE__);
-    // imageDrawLarge(game.selectImg, 12, 9, 16, 0, 2, 2, __LINE__);
     // volcano
     if (game.unlocked_levelcount > 8)
     {
@@ -2135,11 +2167,11 @@ void drawLevelIcons()
         }
         else if (game.unlocked_levelcount == 9)
         {
-            imageDrawLarge(game.selectImg, 2, 12, 20, 4, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 2, 12, 20, 12, 2, 2, __LINE__);
         }
         else
         {
-            imageDrawLarge(game.selectImg, 2, 12, 22, 4, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 2, 12, 22, 12, 2, 2, __LINE__);
         }
         if (game.unlocked_levelcount < 10)
         {
@@ -2147,11 +2179,11 @@ void drawLevelIcons()
         }
         else if (game.unlocked_levelcount == 10)
         {
-            imageDrawLarge(game.selectImg, 5, 12, 28, 4, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 5, 12, 28, 12, 2, 2, __LINE__);
         }
         else
         {
-            imageDrawLarge(game.selectImg, 5, 12, 30, 4, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 5, 12, 30, 12, 2, 2, __LINE__);
         }
         if (game.unlocked_levelcount < 11)
         {
@@ -2159,11 +2191,11 @@ void drawLevelIcons()
         }
         else if (game.unlocked_levelcount == 11)
         {
-            imageDrawLarge(game.selectImg, 9, 12, 20, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 9, 12, 20, 14, 2, 2, __LINE__);
         }
         else
         {
-            imageDrawLarge(game.selectImg, 9, 12, 22, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 9, 12, 22, 14, 2, 2, __LINE__);
         }
         if (game.unlocked_levelcount < 12)
         {
@@ -2171,17 +2203,13 @@ void drawLevelIcons()
         }
         else if (game.unlocked_levelcount == 12)
         {
-            imageDrawLarge(game.selectImg, 12, 12, 28, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 12, 12, 28, 14, 2, 2, __LINE__);
         }
         else
         {
-            imageDrawLarge(game.selectImg, 12, 12, 30, 6, 2, 2, __LINE__);
+            imageDrawLarge(game.selectImg, 12, 12, 30, 14, 2, 2, __LINE__);
         }
     }
-    // imageDrawLarge(game.selectImg, 2, 12, 16, 0, 2, 2, __LINE__);
-    // imageDrawLarge(game.selectImg, 5, 12, 16, 0, 2, 2, __LINE__);
-    // imageDrawLarge(game.selectImg, 9, 12, 16, 0, 2, 2, __LINE__);
-    // imageDrawLarge(game.selectImg, 12, 12, 16, 0, 2, 2, __LINE__);
     imageDrawLarge(game.selectImg, 1, 2, 16, 2, 14, 2, __LINE__);
 }
 
@@ -2220,7 +2248,7 @@ void gameLoop()
         imageDrawLarge(game.menuImg, 12, 14, 20, 0, 4, 2, __LINE__);
 
         imageDrawLarge(game.menuImg, 5, 9, 24, 0, 6, 2, __LINE__);
-        imageDrawLarge(game.menuImg, 5, 11, 24, 2, 7, 2, __LINE__);
+        imageDrawLarge(game.menuImg, 5, 12, 24, 2, 7, 2, __LINE__);
         drawMenuCursor();
         break;
     case GAME_CLASSIC:
