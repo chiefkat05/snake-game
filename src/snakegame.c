@@ -445,7 +445,6 @@ void gamePuzzleInit()
             putFood(1, 5);
             putFood(4, 1);
             putFood(4, 6);
-
             break;
         case 3:
             makeBoard(16, 8);
@@ -696,19 +695,376 @@ void gamePuzzleInit()
             putFood(13, 1);
             break;
         case 9:
-            makeBoard(6, 8);
+            makeBoard(12, 16);
             setBoard(BOARD_VOLCANO);
-            putFood(2, 2);
+            setBoardNothing(0, 1);
+            setBoardNothing(1, 1);
+            setBoardNothing(2, 1);
+            setBoardNothing(3, 1);
+            setBoardNothing(4, 1);
+            setBoardNothing(5, 1);
+
+            setBoardNothing(0, 0);
+            setBoardNothing(1, 0);
+            setBoardNothing(2, 0);
+            setBoardNothing(3, 0);
+            setBoardNothing(4, 0);
+            setBoardNothing(5, 0);
+
+
+            setBoardNothing(0, 4);
+            setBoardNothing(5, 5);
+            setBoardNothing(4, 5);
+            setBoardNothing(4, 6);
+            setBoardNothing(4, 7);
+            setBoardNothing(5, 7);
+            setBoardNothing(6, 7);
+            setBoardNothing(7, 7);
+            setBoardNothing(7, 8);
+            setBoardNothing(7, 9);
+            setBoardNothing(7, 10);
+            setBoardNothing(8, 10);
+            setBoardNothing(9, 10);
+            setBoardNothing(10, 10);
+            setBoardNothing(11, 10);
+            setBoardNothing(11, 9);
+            setBoardNothing(11, 8);
+            setBoardNothing(11, 7);
+            setBoardNothing(11, 6);
+            setBoardNothing(11, 5);
+            setBoardNothing(11, 4);
+            setBoardNothing(0, 2);
+            setBoardNothing(0, 3);
+
+            setBoardWall(3, 13, BOARD_VOLCANO);
+            setBoardWall(3, 14, BOARD_VOLCANO);
+            setBoardWall(4, 13, BOARD_VOLCANO);
+            setBoardWall(5, 13, BOARD_VOLCANO);
+            setBoardWall(6, 13, BOARD_VOLCANO);
+            setBoardWall(7, 13, BOARD_VOLCANO);
+            setBoardWall(8, 13, BOARD_VOLCANO);
+            setBoardWall(8, 14, BOARD_VOLCANO);
+
+            setBoardNothing(4, 14);
+            setBoardNothing(5, 14);
+            setBoardNothing(6, 14);
+            setBoardNothing(7, 14);
+
+            setBoardNothing(4, 15);
+            setBoardNothing(5, 15);
+            setBoardNothing(6, 15);
+            setBoardNothing(7, 15);
+
+            putSnake(10, 2);
+            putFood(9, 8);
+            putFood(10, 1);
+            putFood(9, 1);
+            putFood(10, 2);
+            putFood(1, 13);
+            putFood(2, 13);
+            putFood(9, 13);
+            putFood(10, 13);
+            putFood(5, 9);
+
+            setBoardWall(8, 9, BOARD_VOLCANO);
+            setBoardWall(9, 9, BOARD_VOLCANO);
+            setBoardWall(10, 9, BOARD_VOLCANO);
+
+            setBoardWall(10, 11, BOARD_VOLCANO);
+            setBoardWall(9, 11, BOARD_VOLCANO);
+            setBoardWall(8, 11, BOARD_VOLCANO);
+            setBoardWall(7, 11, BOARD_VOLCANO);
+            setBoardWall(6, 11, BOARD_VOLCANO);
+
+            setBoardWall(6, 10, BOARD_VOLCANO);
+            setBoardWall(6, 9, BOARD_VOLCANO);
+            setBoardWall(6, 8, BOARD_VOLCANO);
+            setBoardWall(5, 8, BOARD_VOLCANO);
+            setBoardWall(4, 8, BOARD_VOLCANO);
+
+            setBoardWall(8, 8, BOARD_VOLCANO);
+            setBoardWall(8, 7, BOARD_VOLCANO);
+            setBoardWall(8, 6, BOARD_VOLCANO);
+            
+            setBoardWall(10, 8, BOARD_VOLCANO);
+            setBoardWall(10, 7, BOARD_VOLCANO);
+            setBoardWall(10, 6, BOARD_VOLCANO);
+            setBoardWall(10, 5, BOARD_VOLCANO);
+            setBoardWall(10, 4, BOARD_VOLCANO);
+            setBoardWall(10, 3, BOARD_VOLCANO);
+
+            setBoardWall(6, 1, BOARD_VOLCANO);
+            setBoardWall(6, 2, BOARD_VOLCANO);
+            setBoardWall(5, 2, BOARD_VOLCANO);
+            setBoardWall(4, 2, BOARD_VOLCANO);
+            setBoardWall(3, 2, BOARD_VOLCANO);
+            setBoardWall(2, 2, BOARD_VOLCANO);
+            setBoardWall(1, 2, BOARD_VOLCANO);
+            setBoardWall(1, 3, BOARD_VOLCANO);
+            setBoardWall(1, 4, BOARD_VOLCANO);
+            setBoardWall(1, 5, BOARD_VOLCANO);
+
+            setBoardWall(3, 4, BOARD_VOLCANO);
+            setBoardWall(4, 4, BOARD_VOLCANO);
+            setBoardWall(5, 4, BOARD_VOLCANO);
+            setBoardWall(6, 4, BOARD_VOLCANO);
+
+            setBoardWall(6, 5, BOARD_VOLCANO);
+            setBoardWall(6, 6, BOARD_VOLCANO);
+            setBoardWall(5, 6, BOARD_VOLCANO);
+            setBoardWall(7, 6, BOARD_VOLCANO);
+
+
+            setBoardWall(3, 5, BOARD_VOLCANO);
+            setBoardWall(3, 6, BOARD_VOLCANO);
+            setBoardWall(3, 7, BOARD_VOLCANO);
+            setBoardWall(3, 8, BOARD_VOLCANO);
             break;
         case 10:
-            makeBoard(6, 8);
+            makeBoard(12, 12);
             setBoard(BOARD_VOLCANO);
-            putFood(2, 2);
+            putFood(1, 1);
+            putFood(1, 10);
+            putFood(10, 10);
+            putFood(10, 1);
+            putFood(8, 3);
+            putFood(8, 8);
+            putFood(3, 8);
+            putFood(6, 5);
+            putFood(3, 5);
+
+            setBoardWall(2, 2, BOARD_VOLCANO);
+            setBoardWall(3, 2, BOARD_VOLCANO);
+            setBoardWall(4, 2, BOARD_VOLCANO);
+            setBoardWall(5, 2, BOARD_VOLCANO);
+            setBoardWall(6, 2, BOARD_VOLCANO);
+            setBoardWall(7, 2, BOARD_VOLCANO);
+            setBoardWall(8, 2, BOARD_VOLCANO);
+
+            setBoardWall(9, 2, BOARD_VOLCANO);
+            setBoardWall(9, 3, BOARD_VOLCANO);
+            setBoardWall(9, 4, BOARD_VOLCANO);
+            setBoardWall(9, 5, BOARD_VOLCANO);
+            setBoardWall(9, 6, BOARD_VOLCANO);
+            setBoardWall(9, 7, BOARD_VOLCANO);
+            setBoardWall(9, 8, BOARD_VOLCANO);
+
+            setBoardWall(9, 9, BOARD_VOLCANO);
+            setBoardWall(8, 9, BOARD_VOLCANO);
+            setBoardWall(7, 9, BOARD_VOLCANO);
+            setBoardWall(6, 9, BOARD_VOLCANO);
+            setBoardWall(5, 9, BOARD_VOLCANO);
+            setBoardWall(4, 9, BOARD_VOLCANO);
+            setBoardWall(3, 9, BOARD_VOLCANO);
+
+            setBoardWall(2, 9, BOARD_VOLCANO);
+            setBoardWall(2, 8, BOARD_VOLCANO);
+            setBoardWall(2, 7, BOARD_VOLCANO);
+            setBoardWall(2, 6, BOARD_VOLCANO);
+            setBoardWall(2, 5, BOARD_VOLCANO);
+
+            setBoardWall(2, 4, BOARD_VOLCANO);
+            setBoardWall(3, 4, BOARD_VOLCANO);
+            setBoardWall(4, 4, BOARD_VOLCANO);
+            setBoardWall(5, 4, BOARD_VOLCANO);
+            setBoardWall(6, 4, BOARD_VOLCANO);
+
+            setBoardWall(7, 4, BOARD_VOLCANO);
+            setBoardWall(7, 5, BOARD_VOLCANO);
+            setBoardWall(7, 6, BOARD_VOLCANO);
+
+            setBoardWall(7, 7, BOARD_VOLCANO);
+            setBoardWall(6, 7, BOARD_VOLCANO);
+            setBoardWall(5, 7, BOARD_VOLCANO);
+            setBoardWall(4, 7, BOARD_VOLCANO);
+
+            game.snake.length = 3;
+            putSnake(7, 8);
+            moveSnake(1, 0);
             break;
         case 11:
-            makeBoard(6, 8);
+            makeBoard(16, 16);
             setBoard(BOARD_VOLCANO);
-            putFood(2, 2);
+            putFood(2, 5);
+            putFood(2, 7);
+            putFood(14, 12);
+            putFood(14, 11);
+            putFood(9, 11);
+            putFood(14, 2);
+            putFood(14, 3);
+            putFood(1, 14);
+            putFood(1, 3);
+
+            setBoardNothing(15, 15);
+            setBoardNothing(14, 15);
+            setBoardNothing(14, 14);
+            setBoardNothing(15, 14);
+            setBoardNothing(13, 14);
+            setBoardNothing(13, 15);
+
+            setBoardNothing(6, 0);
+            setBoardNothing(7, 0);
+            setBoardNothing(8, 0);
+            setBoardNothing(9, 0);
+            setBoardNothing(10, 0);
+            setBoardNothing(11, 0);
+            setBoardNothing(12, 0);
+            setBoardNothing(13, 0);
+            setBoardNothing(14, 0);
+            setBoardNothing(15, 0);
+
+            setBoardNothing(0, 5);
+            setBoardNothing(0, 6);
+            setBoardNothing(0, 7);
+            setBoardNothing(0, 8);
+
+            setBoardNothing(4, 5);
+            setBoardNothing(4, 6);
+            setBoardNothing(4, 7);
+            setBoardNothing(4, 8);
+
+            setBoardNothing(8, 9);
+            setBoardNothing(8, 8);
+            setBoardNothing(8, 7);
+            setBoardNothing(8, 6);
+            setBoardNothing(8, 5);
+            setBoardWall(7, 4, BOARD_VOLCANO);
+            setBoardWall(8, 4, BOARD_VOLCANO);
+            setBoardWall(9, 4, BOARD_VOLCANO);
+            setBoardWall(11, 4, BOARD_VOLCANO);
+
+            setBoardWall(12, 4, BOARD_VOLCANO);
+            setBoardWall(12, 5, BOARD_VOLCANO);
+            setBoardWall(12, 6, BOARD_VOLCANO);
+            setBoardWall(12, 7, BOARD_VOLCANO);
+            setBoardWall(13, 7, BOARD_VOLCANO);
+
+            setBoardWall(14, 7, BOARD_VOLCANO);
+            setBoardWall(14, 8, BOARD_VOLCANO);
+            setBoardWall(14, 9, BOARD_VOLCANO);
+
+            setBoardWall(7, 10, BOARD_VOLCANO);
+            setBoardWall(8, 10, BOARD_VOLCANO);
+            setBoardWall(9, 10, BOARD_VOLCANO);
+            setBoardWall(11, 10, BOARD_VOLCANO);
+            setBoardWall(12, 10, BOARD_VOLCANO);
+            setBoardWall(13, 10, BOARD_VOLCANO);
+            setBoardWall(14, 10, BOARD_VOLCANO);
+
+            setBoardWall(7, 5, BOARD_VOLCANO);
+            setBoardWall(7, 6, BOARD_VOLCANO);
+            setBoardWall(7, 7, BOARD_VOLCANO);
+            setBoardWall(7, 8, BOARD_VOLCANO);
+            setBoardWall(7, 9, BOARD_VOLCANO);
+
+            setBoardNothing(9, 9);
+            setBoardNothing(9, 8);
+            setBoardNothing(9, 7);
+            setBoardNothing(9, 6);
+            setBoardNothing(9, 5);
+
+            setBoardNothing(12, 9);
+            setBoardNothing(12, 8);
+            setBoardNothing(12, 7);
+            setBoardNothing(12, 6);
+            setBoardNothing(12, 5);
+
+            setBoardNothing(13, 9);
+            setBoardNothing(13, 8);
+            setBoardNothing(13, 7);
+            setBoardNothing(13, 6);
+            setBoardNothing(13, 5);
+
+            setBoardNothing(14, 9);
+            setBoardNothing(14, 8);
+            setBoardNothing(14, 7);
+            setBoardNothing(14, 6);
+            setBoardNothing(14, 5);
+
+            setBoardNothing(15, 9);
+            setBoardNothing(15, 8);
+            setBoardNothing(15, 7);
+            setBoardNothing(15, 6);
+            setBoardNothing(15, 5);
+
+            setBoardNothing(11, 9);
+            setBoardNothing(11, 8);
+            setBoardNothing(11, 7);
+            setBoardNothing(11, 6);
+            setBoardNothing(11, 5);
+
+            setBoardNothing(10, 9);
+            setBoardNothing(10, 8);
+            setBoardNothing(10, 7);
+            setBoardNothing(10, 6);
+            setBoardNothing(10, 5);
+            setBoardWall(10, 10, BOARD_VOLCANO);
+            setBoardWall(10, 4, BOARD_VOLCANO);
+
+            setBoardWall(5, 1, BOARD_VOLCANO);
+            setBoardWall(6, 1, BOARD_VOLCANO);
+            setBoardWall(7, 1, BOARD_VOLCANO);
+            setBoardWall(8, 1, BOARD_VOLCANO);
+            setBoardWall(9, 1, BOARD_VOLCANO);
+            setBoardWall(10, 1, BOARD_VOLCANO);
+            setBoardWall(11, 1, BOARD_VOLCANO);
+            setBoardWall(12, 1, BOARD_VOLCANO);
+            setBoardWall(13, 1, BOARD_VOLCANO);
+            setBoardWall(14, 1, BOARD_VOLCANO);
+
+            setBoardWall(3, 4, BOARD_VOLCANO);
+            setBoardWall(3, 5, BOARD_VOLCANO);
+            setBoardWall(3, 6, BOARD_VOLCANO);
+            setBoardWall(3, 7, BOARD_VOLCANO);
+            setBoardWall(3, 8, BOARD_VOLCANO);
+            setBoardWall(3, 9, BOARD_VOLCANO);
+
+            setBoardWall(4, 4, BOARD_VOLCANO);
+            setBoardWall(4, 9, BOARD_VOLCANO);
+
+            setBoardWall(5, 4, BOARD_VOLCANO);
+            setBoardWall(5, 5, BOARD_VOLCANO);
+            setBoardWall(5, 6, BOARD_VOLCANO);
+            setBoardWall(5, 7, BOARD_VOLCANO);
+            setBoardWall(5, 8, BOARD_VOLCANO);
+            setBoardWall(5, 9, BOARD_VOLCANO);
+
+            setBoardWall(3, 11, BOARD_VOLCANO);
+            setBoardWall(3, 12, BOARD_VOLCANO);
+            setBoardWall(3, 13, BOARD_VOLCANO);
+
+            setBoardWall(5, 11, BOARD_VOLCANO);
+            setBoardWall(5, 12, BOARD_VOLCANO);
+            setBoardWall(6, 12, BOARD_VOLCANO);
+            setBoardWall(7, 12, BOARD_VOLCANO);
+            setBoardWall(8, 12, BOARD_VOLCANO);
+            setBoardWall(9, 12, BOARD_VOLCANO);
+            setBoardWall(10, 12, BOARD_VOLCANO);
+            setBoardWall(10, 11, BOARD_VOLCANO);
+            setBoardWall(5, 13, BOARD_VOLCANO);
+
+            setBoardWall(1, 4, BOARD_VOLCANO);
+            setBoardWall(1, 5, BOARD_VOLCANO);
+            setBoardWall(1, 6, BOARD_VOLCANO);
+            setBoardWall(1, 7, BOARD_VOLCANO);
+            setBoardWall(1, 8, BOARD_VOLCANO);
+            setBoardWall(1, 9, BOARD_VOLCANO);
+
+            setBoardWall(14, 13, BOARD_VOLCANO);
+            setBoardWall(13, 13, BOARD_VOLCANO);
+            setBoardWall(12, 13, BOARD_VOLCANO);
+            setBoardWall(12, 14, BOARD_VOLCANO);
+
+            setBoardWall(13, 4, BOARD_VOLCANO);
+            setBoardWall(14, 4, BOARD_VOLCANO);
+
+            putSnake(1, 1);
+            game.snake.length = 6;
+            moveSnake(1, 0);
+            moveSnake(1, 0);
+            moveSnake(1, 0);
+            moveSnake(0, 1);
+            moveSnake(1, 0);
             break;
         default:
             break;
@@ -869,10 +1225,6 @@ void moveSnake(int xdelta, int ydelta)
 
     game.snake.parts[0].x += xdelta;
     game.snake.parts[0].y += ydelta;
-
-    // remove
-    printf("snake moved to board position %i %i\n",
-            game.snake.parts[0].x - game.board.left, game.snake.parts[0].y - game.board.top);
 
     game.snake.parts[0].last_move_direction = getMoveDirection(xdelta, ydelta);
 }
@@ -1072,6 +1424,17 @@ void updateClassicFood()
 void drawFood()
 {
     int i;
+    if (game.state == GAME_CLASSIC)
+    {
+        for (i = 0; i < game.foodcount; ++i)
+        {
+            if (game.foods[i].eaten)
+                continue;
+
+            imageDraw(game.grassBoardImg, game.foods[i].x, game.foods[i].y, 3, 2, __LINE__);
+        }
+        return;
+    }
     for (i = 0; i < game.foodcount; ++i)
     {
         if (game.foods[i].eaten)
@@ -1485,7 +1848,6 @@ void sdlEventLoop(SDL_Event *event)
             case SDL_MOUSEMOTION:
                 if (event->motion.x < 0 || event->motion.x > screen_width || event->motion.y < 0 || event->motion.y > screen_height)
                     continue;
-                // printf("mouse moved to %i %i\n", event->motion.x, event->motion.y);
                 break;
             case SDL_KEYDOWN:
                 if (event->key.repeat)
@@ -1906,7 +2268,6 @@ void gameLoop()
         drawSnake();
         drawSnake();
         drawPuzzleObjective(textbuf);
-        // printf("huh %i %i %i\n", game.state, game.current_level, game.unlocked_levelcount);
         break;
     case GAME_LOST_CLASSIC:
         handleLostClassicInput();
@@ -1916,8 +2277,6 @@ void gameLoop()
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
         }
-        drawBoard();
-        drawFood();
         snakeExplode();
         drawSnake();
         if (game.snake.parts[game.snake.length - 1].destroyed)
@@ -1938,8 +2297,6 @@ void gameLoop()
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
         }
-        drawBoard();
-        drawFood();
         snakeExplode();
         drawSnake();
         if (game.snake.parts[game.snake.length - 1].destroyed)

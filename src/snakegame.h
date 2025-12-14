@@ -15,12 +15,7 @@
 
 // game plan
 
-// add rules in lvl1-3 rules to treat the set obstacles like walls
 
-// transition
-// make transition animation and make sure it looks right by playing it at the start of one of the scenes
-// idk go from there
-// transition is bonus if you really really have time but you won't so don't bother
 
 #define MAX_FOODS 16
 typedef struct
