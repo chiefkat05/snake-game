@@ -43,6 +43,15 @@ typedef struct
     double move_timer;
 } Snake;
 
+typedef enum
+{
+    BOARD_GRASS,
+    BOARD_SANDBOX,
+    BOARD_VOLCANO,
+    BOARD_CLASSIC
+} BoardType;
+
+
 #define BOARD_WIDTH 16
 #define BOARD_HEIGHT 16
 typedef struct
@@ -52,10 +61,12 @@ typedef struct
     int width, height;
 
     int left, right, top, bottom;
+    BoardType type;
 } Board;
 
 typedef enum
 {
+    GAME_NULL,
     GAME_MENU,
     GAME_SELECT,
     GAME_PUZZLE1,
@@ -76,13 +87,6 @@ typedef enum
     GAME_LOST_PUZZLE,
     GAME_WON
 } GameState;
-
-typedef enum
-{
-    BOARD_GRASS,
-    BOARD_SANDBOX,
-    BOARD_VOLCANO
-} BoardType;
 
 typedef struct
 {
@@ -143,9 +147,10 @@ typedef struct
     Music *volcanoMus;
     Music *winMus;
     Music *lostMus;
-    Music *eatSnd;
-    Music *moveSnd;
-    Music *explodeSnd;
+
+    Mix_Chunk *eatSnd, *moveSnd, *explodeSnd;
+
+    int transitionTimer;
 } Game;
 extern Game game;
 

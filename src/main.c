@@ -31,8 +31,20 @@ int main(int argc, char **argv)
     appInit();
 
     game.running = true;
-    game.state = GAME_WON;
+    game.state = GAME_NULL;
     gameGoTo(GAME_MENU);
+
+    // ran out of time during the jam to make/connect this to a sane system, so it's getting dumped at the start of the game
+    game.menuMus = musicLoad("./snd/menu.ogg");
+    game.grassMus = musicLoad("./snd/grass.ogg");
+    game.sandboxMus = musicLoad("./snd/sandbox.ogg");
+    game.volcanoMus = musicLoad("./snd/volcano.ogg");
+    game.selectMus = musicLoad("./snd/select.ogg");
+    game.winMus = musicLoad("./snd/won.ogg");
+    game.lostMus = musicLoad("./snd/lost.ogg");
+    game.explodeSnd = Mix_LoadWAV("./snd/explosion.wav");
+    game.eatSnd = Mix_LoadWAV("./snd/eat.wav");
+    game.moveSnd = Mix_LoadWAV("./snd/move.wav");
 
     loadGame();
 

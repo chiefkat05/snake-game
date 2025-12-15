@@ -226,30 +226,6 @@ void setBoardWall(int x, int y, BoardType type)
     }
     game.board.wall[game.board.left + x][game.board.top + y] = 1;
 }
-void musicInit()
-{
-    // if (!game.menuMus)
-    // {
-    //     game.menuMus = musicLoad("./snd/menu.ogg");
-    //     game.grassMus = musicLoad("./snd/grass.ogg");
-    //     game.sandboxMus = musicLoad("./snd/sandbox.ogg");
-    //     game.volcanoMus = musicLoad("./snd/volcano.ogg");
-    //     game.selectMus = musicLoad("./snd/select.ogg");
-    //     game.winMus = musicLoad("./snd/win.ogg");
-    //     game.lostMus = musicLoad("./snd/lost.ogg");
-    // }
-
-    // musicStop();
-}
-void musicFadeHandler()
-{
-    switch(game.state)
-    {
-        case GAME_CLASSIC:
-            // musicPlay(game.grassMus, __LINE__);
-            break;
-    }
-}
 void setBoardCustomWall(int x, int y, int tx, int ty)
 {
     game.board.texture[game.board.left + x][game.board.top + y][0] = tx;
@@ -280,12 +256,64 @@ void putFood(int x, int y)
     game.foods[game.foodcount].y = y;
     ++game.foodcount;
 }
+
+void musicHandler()
+{
+    if (game.gotostate != game.state)
+    {
+        musicStop();
+    }
+
+    if (Mix_Playing(-1) == 0)
+        return;
+
+        switch(game.state)
+        {
+            case GAME_MENU:
+                musicFadeIn(game.menuMus, __LINE__);
+                break;
+            case GAME_CLASSIC:
+                musicFadeIn(game.grassMus, __LINE__);
+                break;
+            case GAME_PUZZLE1:
+            case GAME_PUZZLE2:
+            case GAME_PUZZLE3:
+            case GAME_PUZZLE4:
+                musicFadeIn(game.grassMus, __LINE__);
+                break;
+            case GAME_PUZZLE5:
+            case GAME_PUZZLE6:
+            case GAME_PUZZLE7:
+            case GAME_PUZZLE8:
+                musicFadeIn(game.sandboxMus, __LINE__);
+                break;
+            case GAME_PUZZLE9:
+            case GAME_PUZZLE10:
+            case GAME_PUZZLE11:
+            case GAME_PUZZLE12:
+                musicFadeIn(game.volcanoMus, __LINE__);
+                break;
+            case GAME_SELECT:
+                musicFadeIn(game.selectMus, __LINE__);
+                break;
+            case GAME_WON:
+                musicFadeIn(game.winMus, __LINE__);
+                break;
+            case GAME_LOST_PUZZLE:
+            case GAME_LOST_CLASSIC:
+                musicFadeIn(game.winMus, __LINE__);
+                break;
+            default:
+                break;
+        }
+}
+
 void gameMenuInit()
 {
-    musicInit();
     game.menuImg = imageLoad("./img/mainmenumap.png");
 
-    // musicPlay(game.menuMus, __LINE__);
+    if (game.gotostate == GAME_MENU)
+        musicPlay(game.menuMus, 1, 1, __LINE__);
 
     game.menuCursorAnim = animationCreate();
     addFrame(16, 2, 40000);
@@ -321,14 +349,12 @@ void gameMenuInit()
 
     game.menuCursor.x = screen_width / (2 * IMG_PIXEL_SIZE);
     game.menuCursor.y = screen_height / (2 * IMG_PIXEL_SIZE);
-
-    game.menuMus = musicLoad("./snd/menu.ogg");
 }
 void gameSelectInit()
 {
-    musicInit();
     game.selectImg = imageLoad("./img/selectmap.png");
-    // musicPlay(game.selectMus, __LINE__);
+
+    musicPlay(game.selectMus, 1, 1, __LINE__);
 
     game.selectBGAnim = animationCreate();
     addFrame(0, 0, 8000);
@@ -339,7 +365,6 @@ void gameSelectInit()
 }
 void baseGameInit()
 {
-    musicInit();
     game.snakeImg = imageLoad("./img/snakemap.png");
     game.grassBoardImg = imageLoad("./img/grassmap.png");
 
@@ -423,7 +448,7 @@ void gameClassicInit()
 {
     baseGameInit();
 
-    // musicPlay(game.grassMus, __LINE__);
+    musicPlay(game.grassMus, 1, 0, __LINE__);
 
     makeBoard(16, 16);
     setBoard(BOARD_GRASS);
@@ -432,6 +457,19 @@ void gameClassicInit()
 void gamePuzzleInit()
 {
     baseGameInit();
+
+    if (game.current_level < 4)
+    {
+        musicPlay(game.grassMus, 1, 0, __LINE__);
+    }
+    else if (game.current_level < 8)
+    {
+        musicPlay(game.sandboxMus, 1, 0, __LINE__);
+    }
+    else if (game.current_level < 12)
+    {
+        musicPlay(game.volcanoMus, 1, 0, __LINE__);
+    }
 
     game.winTextImg = imageLoad("./img/winmap.png");
     game.winAnim = animationCreate();
@@ -1117,13 +1155,13 @@ void gamePuzzleInit()
 void gameSceneExit()
 {
     imagePoolFreeAll();
-    // musicPoolFreeAll();
     animationPoolFreeAll();
 }
 void gameLoseInit()
 {
-    musicInit();
     game.loseTextImg = imageLoad("./img/losemap.png");
+
+    musicPlay(game.lostMus, 0, 1, __LINE__);
 
     game.loseAnim = animationCreate();
     addFrame(0, 0, 800);
@@ -1148,6 +1186,7 @@ void gameLoseInit()
 
 void gameGoTo(GameState state)
 {
+    game.transitionTimer = 800;
     game.gotostate = state;
     if (game.gotostate >= GAME_PUZZLE1 && game.gotostate <= GAME_PUZZLE12)
     {
@@ -1158,6 +1197,13 @@ void gameHandleGoTo()
 {
     if (game.gotostate == game.state)
         return;
+
+    // breaks maps for some reason
+    // if (game.transitionTimer > 0)
+    // {
+    //     game.transitionTimer -= tick_speed;
+    //     return;
+    // }
 
     switch(game.state)
     {
@@ -1229,6 +1275,9 @@ void gameHandleGoTo()
         case GAME_LOST_CLASSIC:
         case GAME_LOST_PUZZLE:
             gameLoseInit();
+            break;
+        case GAME_WON:
+            musicPlay(game.winMus, 0, 1, __LINE__);
             break;
         default:
             break;
@@ -1616,6 +1665,8 @@ void classicRules()
             game.snake.parts[game.snake.length].x = game.snake.parts[game.snake.length - 1].x - getXNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
             game.snake.parts[game.snake.length].y = game.snake.parts[game.snake.length - 1].y - getYNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
             ++game.snake.length;
+
+            Mix_PlayChannel(-1, game.eatSnd, 0);
         }
     }
 
@@ -1679,6 +1730,8 @@ void puzzleRules()
             game.snake.parts[game.snake.length].x = game.snake.parts[game.snake.length - 1].x - getXNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
             game.snake.parts[game.snake.length].y = game.snake.parts[game.snake.length - 1].y - getYNormalFromDirection(game.snake.parts[game.snake.length - 1].last_move_direction);
             ++game.snake.length;
+
+            Mix_PlayChannel(-1, game.eatSnd, 0);
         }
     }
 }
@@ -1982,7 +2035,14 @@ void handleWonInput()
 {
     if (getAnyKey() && !getKey(SDL_SCANCODE_ESCAPE) && game.winAnim->frame == game.winAnim->framecount - 1)
     {
-        gameGoTo(GAME_SELECT);
+        if (game.current_level == 11)
+        {
+            gameGoTo(GAME_SELECT);
+        }
+        else
+        {
+            gameGoTo(GAME_PUZZLE1 + game.current_level + 1);
+        }
     }
 }
 void handleClassicInput()
@@ -2078,6 +2138,7 @@ void snakeExplode()
                 game.snakePartExplodeAnim->frame = 0;
             }
             imageDrawAnimated(game.snakeImg, game.snake.parts[i].x, game.snake.parts[i].y, game.snakePartExplodeAnim, __LINE__);
+            Mix_PlayChannel(-1, game.explodeSnd, 0);
             break;
         }
     }
@@ -2253,6 +2314,7 @@ void gameLoop()
     int game_caught_up = 0;
     gameUpdateTime();
 
+    musicHandler();
     gameHandleGoTo();
 
     char textbuf[128];
@@ -2262,22 +2324,14 @@ void gameLoop()
     case GAME_MENU:
         deactivateCursor(&game.menuCursor);
         handleMenuInput();
+        
         while (!game_caught_up)
         {
-            // musicFadeOut(game.grassMus, __LINE__);
-            // musicFadeOut(game.sandboxMus, __LINE__);
-            // musicFadeOut(game.volcanoMus, __LINE__);
-            // musicFadeOut(game.selectMus, __LINE__);
-            // musicFadeOut(game.winMus, __LINE__);
-            // musicFadeOut(game.lostMus, __LINE__);
-            // musicFadeIn(game.menuMus, __LINE__);
-
             menuRules();
             animationPoolUpdateAll();
 
             game_caught_up = gameCaughtUp();
         }
-        musicFadeIn(game.menuMus, __LINE__);
 
         imageDrawLarge(game.menuImg, 0, 0, 0, 0, 16, 16, __LINE__);
         imageDrawLargeAnimated(game.menuImg, 5, 6, game.menuSnakeBlinkAnim, 2, 2, __LINE__);
@@ -2293,14 +2347,6 @@ void gameLoop()
         handleClassicInput();
         while (!game_caught_up)
         {
-            // musicFadeIn(game.grassMus, __LINE__);
-            // musicFadeOut(game.sandboxMus, __LINE__);
-            // musicFadeOut(game.volcanoMus, __LINE__);
-            // musicFadeOut(game.selectMus, __LINE__);
-            // musicFadeOut(game.winMus, __LINE__);
-            // musicFadeOut(game.lostMus, __LINE__);
-            // musicFadeOut(game.menuMus, __LINE__);
-
             classicRules();
             updateClassicFood();
             animationPoolUpdateAll();
@@ -2319,14 +2365,6 @@ void gameLoop()
         handleMenuInput();
         while (!game_caught_up)
         {
-            // musicFadeOut(game.grassMus, __LINE__);
-            // musicFadeOut(game.sandboxMus, __LINE__);
-            // musicFadeOut(game.volcanoMus, __LINE__);
-            // musicFadeIn(game.selectMus, __LINE__);
-            // musicFadeOut(game.winMus, __LINE__);
-            // musicFadeOut(game.lostMus, __LINE__);
-            // musicFadeOut(game.menuMus, __LINE__);
-
             selectRules();
             animationPoolUpdateAll();
 
@@ -2356,36 +2394,6 @@ void gameLoop()
         handlePuzzleInput();
         while (!game_caught_up)
         {
-            if (game.state >= GAME_PUZZLE1 && game.state <= GAME_PUZZLE4)
-            {
-                // musicFadeIn(game.grassMus, __LINE__);
-                // musicFadeOut(game.sandboxMus, __LINE__);
-                // musicFadeOut(game.volcanoMus, __LINE__);
-                // musicFadeOut(game.selectMus, __LINE__);
-                // musicFadeOut(game.winMus, __LINE__);
-                // musicFadeOut(game.lostMus, __LINE__);
-                // musicFadeOut(game.menuMus, __LINE__);
-            }
-            if (game.state >= GAME_PUZZLE5 && game.state <= GAME_PUZZLE8)
-            {
-                // musicFadeOut(game.grassMus, __LINE__);
-                // musicFadeIn(game.sandboxMus, __LINE__);
-                // musicFadeOut(game.volcanoMus, __LINE__);
-                // musicFadeOut(game.selectMus, __LINE__);
-                // musicFadeOut(game.winMus, __LINE__);
-                // musicFadeOut(game.lostMus, __LINE__);
-                // musicFadeOut(game.menuMus, __LINE__);
-            }
-            if (game.state >= GAME_PUZZLE9 && game.state <= GAME_PUZZLE12)
-            {
-                // musicFadeOut(game.grassMus, __LINE__);
-                // musicFadeOut(game.sandboxMus, __LINE__);
-                // musicFadeIn(game.volcanoMus, __LINE__);
-                // musicFadeOut(game.selectMus, __LINE__);
-                // musicFadeOut(game.winMus, __LINE__);
-                // musicFadeOut(game.lostMus, __LINE__);
-                // musicFadeOut(game.menuMus, __LINE__);
-            }
             puzzleRules();
             animationPoolUpdateAll();
 
@@ -2402,14 +2410,6 @@ void gameLoop()
         handleLostClassicInput();
         while (!game_caught_up)
         {
-            // musicFadeOut(game.grassMus, __LINE__);
-            // musicFadeOut(game.sandboxMus, __LINE__);
-            // musicFadeOut(game.volcanoMus, __LINE__);
-            // musicFadeOut(game.selectMus, __LINE__);
-            // musicFadeOut(game.winMus, __LINE__);
-            // musicFadeIn(game.lostMus, __LINE__);
-            // musicFadeOut(game.menuMus, __LINE__);
-
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
         }
@@ -2431,13 +2431,6 @@ void gameLoop()
         handleLostPuzzleInput();
         while (!game_caught_up)
         {
-            // musicFadeOut(game.grassMus, __LINE__);
-            // musicFadeOut(game.sandboxMus, __LINE__);
-            // musicFadeOut(game.volcanoMus, __LINE__);
-            // musicFadeOut(game.selectMus, __LINE__);
-            // musicFadeOut(game.winMus, __LINE__);
-            // musicFadeIn(game.lostMus, __LINE__);
-
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
         }
@@ -2459,14 +2452,6 @@ void gameLoop()
         handleWonInput();
         while (!game_caught_up)
         {
-            // musicFadeOut(game.grassMus, __LINE__);
-            // musicFadeOut(game.sandboxMus, __LINE__);
-            // musicFadeOut(game.volcanoMus, __LINE__);
-            // musicFadeOut(game.selectMus, __LINE__);
-            // musicFadeIn(game.winMus, __LINE__);
-            // musicFadeOut(game.lostMus, __LINE__);
-            // musicFadeOut(game.menuMus, __LINE__);
-
             animationPoolUpdateAll();
             game_caught_up = gameCaughtUp();
         }

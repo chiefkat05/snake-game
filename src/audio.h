@@ -24,7 +24,7 @@ extern MusicPool music_pool;
 Music *musicAlloc();
 void loadMusicMixLoadWAV(Music *mus, const char *path);
 Music *musicLoad(const char *path);
-void musicPlay(Music *mus, int line);
+void musicPlay(Music *mus, int loop, int vol, int line);
 void musicFree(Music *mus);
 void musicFadeIn(Music *mus, int line);
 void musicFadeOut(Music *mus, int line);
